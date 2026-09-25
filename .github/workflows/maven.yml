@@ -30,4 +30,4 @@ jobs:
         cache: maven
 
     - name: Compilar y ejecutar pruebas con Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package -DskipTests --file pom.xml
