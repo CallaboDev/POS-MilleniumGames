@@ -65,4 +65,4 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioRepository.deleteById(id);
         }
     }
-}```
+}
