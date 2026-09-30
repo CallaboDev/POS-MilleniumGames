@@ -15,6 +15,8 @@ public interface UsuarioService {
 
     Optional<Usuario> buscarPorUsername(String username);
 
+    Optional<Usuario> buscarPorUsername(String username);
+
     boolean existePorUsername(String username);
 
     Usuario guardar(Usuario usuario);
