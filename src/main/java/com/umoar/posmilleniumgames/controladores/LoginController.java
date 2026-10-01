@@ -42,12 +42,9 @@ public class LoginController {
         return "redirect:/login";
     }
 
-
     @GetMapping("/logout")
     public String cerrarSesion(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
     }
 }
-
-
