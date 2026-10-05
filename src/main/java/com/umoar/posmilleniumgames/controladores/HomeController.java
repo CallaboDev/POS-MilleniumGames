@@ -36,25 +36,33 @@ public class HomeController {
     }
 
     @GetMapping("/reportes")
-    public String reportes(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
-            Model model) {
-        LocalDate hoy = LocalDate.now();
-        desde = desde == null ? hoy.withDayOfMonth(1) : desde;
-        hasta = hasta == null ? hoy : hasta;
-        if (desde.isAfter(hasta)) {
-            model.addAttribute("errorFechas", "La fecha Desde no puede ser posterior a la fecha Hasta.");
-            desde = hasta;
-        }
+public String reportes(
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+        Model model) {
 
-        model.addAttribute("desde", desde);
-        model.addAttribute("hasta", hasta);
-        model.addAttribute("ventas", reporteService.buscarVentas(desde, hasta));
-        model.addAttribute("ingresosPeriodo", reporteService.ingresosEntre(desde, hasta.plusDays(1)));
-        model.addAttribute("cantidadVentas", reporteService.ventasEntre(desde, hasta.plusDays(1)));
-        model.addAttribute("stockCritico", reporteService.productosConStockCritico());
-        model.addAttribute("productosMasVendidos", reporteService.productosMasVendidos());
-        return "reportes";
+    LocalDate hoy = LocalDate.now();
+
+    // Default del rango al mes actual
+    desde = (desde == null) ? hoy.withDayOfMonth(1) : desde;
+    hasta = (hasta == null) ? hoy : hasta;
+
+    // Validación
+    if (desde.isAfter(hasta)) {
+        model.addAttribute("errorFechas", "La fecha Desde no puede ser posterior a la fecha Hasta.");
+        desde = hasta;
     }
+
+    // Mantener la misma convención en todo el reporte:
+    // [desde, hasta] en UI y consulta semiabierta [desde, hasta + 1 día) en SQL.
+    model.addAttribute("desde", desde);
+    model.addAttribute("hasta", hasta);
+    model.addAttribute("ventas", reporteService.buscarVentas(desde, hasta));
+    model.addAttribute("ingresosPeriodo", reporteService.ingresosEntre(desde, hasta.plusDays(1)));
+    model.addAttribute("cantidadVentas", reporteService.ventasEntre(desde, hasta.plusDays(1)));
+    model.addAttribute("stockCritico", reporteService.productosConStockCritico());
+    model.addAttribute("productosMasVendidos", reporteService.productosMasVendidos());
+
+    return "reportes";
+}
 }
