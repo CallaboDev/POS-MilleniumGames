@@ -62,7 +62,7 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light"><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th>Desglose</th><th></th>Método de pago</th><th class="text-end">Total</th></tr></thead>
+                        <thead class="table-light"><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th>Desglose</th><th>Método de pago</th><th class="text-end">Total</th></tr></thead>
                         <tbody>
                         <tr th:each="venta : ${ventas}">
                             <td class="fw-semibold" th:text="${venta.numeroFactura}">FAC-0001</td>
