@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> findByStockLessThanEqualOrderByStockAsc(Integer stock);
+
     long countByStockLessThanEqual(Integer stock);
 }
