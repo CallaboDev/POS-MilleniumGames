@@ -38,7 +38,13 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     private boolean esRutaAdministrativa(String path) {
-        return perteneceARuta(path, "/usuarios") || perteneceARuta(path, "/reportes");
+        return perteneceARuta(path, "/usuarios")
+                || perteneceARuta(path, "/reportes")
+                || perteneceARuta(path, "/dashboard")
+                || perteneceARuta(path, "/inventario")
+                || perteneceARuta(path, "/configuracion")
+                || perteneceARuta(path, "/roles")
+                || perteneceARuta(path, "/empleados");
     }
 
     private boolean perteneceARuta(String path, String base) {
