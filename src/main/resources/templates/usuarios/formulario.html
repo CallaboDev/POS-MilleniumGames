@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Empleado')}">
+    <title>Empleado | Millenium Games POS</title>
+</head>
+<body>
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+        <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+            <div class="mb-4 pb-3 border-bottom">
+                <a th:href="@{/usuarios}" class="text-decoration-none small fw-semibold d-inline-flex align-items-center gap-1 mb-3">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a personal
+                </a>
+                <h1 class="h3 fw-bold text-dark mb-1"
+                    th:text="${esEdicion} ? 'Editar empleado' : 'Nuevo empleado'">Nuevo empleado</h1>
+                <p class="text-secondary mb-0">Completa los datos de acceso y asigna un rol.</p>
+            </div>
+
+            <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}"></div>
+
+            <section class="card border-0 shadow-sm rounded-4" style="max-width: 760px;">
+                <div class="card-body p-3 p-md-4 p-lg-5">
+                    <form th:if="${!esEdicion}" th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="username" class="form-label fw-semibold">Username</label>
+                                <input id="username" type="text" th:field="*{username}" class="form-control"
+                                       autocomplete="username" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="nombre" class="form-label fw-semibold">Nombre</label>
+                                <input id="nombre" type="text" th:field="*{nombre}" class="form-control"
+                                       autocomplete="name" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="password" class="form-label fw-semibold">Contraseña</label>
+                                <input id="password" name="password" type="password" class="form-control"
+                                       autocomplete="new-password" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="rol" class="form-label fw-semibold">Rol</label>
+                                <select id="rol" th:field="*{rol}" class="form-select" required>
+                                    <option value="" disabled>Selecciona un rol</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="CAJERO">CAJERO</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                            <a th:href="@{/usuarios}" class="btn btn-light border rounded-3 px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">
+                                <i class="bi bi-check-lg me-1"></i>Guardar empleado
+                            </button>
+                        </div>
+                    </form>
+
+                    <form th:if="${esEdicion}" th:action="@{/usuarios/actualizar/{id}(id=${usuario.id})}"
+                          th:object="${usuario}" method="post">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="username-edit" class="form-label fw-semibold">Username</label>
+                                <input id="username-edit" type="text" th:field="*{username}" class="form-control"
+                                       autocomplete="username" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="nombre-edit" class="form-label fw-semibold">Nombre</label>
+                                <input id="nombre-edit" type="text" th:field="*{nombre}" class="form-control"
+                                       autocomplete="name" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="password-edit" class="form-label fw-semibold">Nueva contraseña</label>
+                                <input id="password-edit" name="password" type="password" class="form-control"
+                                       autocomplete="new-password" placeholder="Dejar vacía para conservar la actual">
+                                <div class="form-text">La contraseña actual no se muestra. Déjalo vacío si no deseas cambiarla.</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="rol-edit" class="form-label fw-semibold">Rol</label>
+                                <select id="rol-edit" th:field="*{rol}" class="form-select" required>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="CAJERO">CAJERO</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                            <a th:href="@{/usuarios}" class="btn btn-light border rounded-3 px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">
+                                <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body>
+</html>

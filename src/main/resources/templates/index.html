@@ -78,8 +78,9 @@
                     </div>
                 </div>
 
-                <!-- Métrica 3: Ventas del Día -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <!-- Métrica 3: Ventas del Día (solo ADMIN) -->
+                <div class="col-12 col-sm-6 col-xl-3"
+                     th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
                     <div class="metric-card p-3 p-lg-4 h-100 border-start border-4 border-warning">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
@@ -98,9 +99,9 @@
                     </div>
                 </div>
 
-                <!-- Métrica 4: Personal -->
-                <!-- Este botón solo será visible para la vista del admin -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <!-- Métrica 4: Personal (solo ADMIN) -->
+                <div class="col-12 col-sm-6 col-xl-3"
+                     th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
                     <div class="metric-card p-3 p-lg-4 h-100 border-start border-4 border-success">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
@@ -144,9 +145,9 @@
                             </a>
                         </div>
 
-                        <!-- 2. Registrar Videojuego (azul) -->
-                        <!-- Este botón solo será visible para la vista del admin -->
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <!-- 2. Registrar Videojuego (solo ADMIN) -->
+                        <div class="col-12 col-sm-6 col-xl-3"
+                             th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
                             <a th:href="@{/productos}" class="quick-action-card h-100">
                                 <div class="metric-icon-box bg-primary-subtle text-primary" style="width: 44px; height: 44px; font-size: 1.25rem;">
                                     <i class="bi bi-box-seam"></i>
@@ -174,8 +175,9 @@
                             </a>
                         </div>
 
-                        <!-- 4. Consultar Reportes (cian) -->
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <!-- 4. Consultar Reportes (solo ADMIN) -->
+                        <div class="col-12 col-sm-6 col-xl-3"
+                             th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
                             <a th:href="@{/dashboard}" class="quick-action-card h-100">
                                 <div class="metric-icon-box bg-info-subtle text-info" style="width: 44px; height: 44px; font-size: 1.25rem;">
                                     <i class="bi bi-graph-up"></i>
