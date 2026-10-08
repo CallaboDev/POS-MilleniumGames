@@ -53,7 +53,7 @@ public class ReporteServiceImpl implements ReporteService {
 
     @Override
     public BigDecimal ingresosEntre(LocalDate desde, LocalDate hastaExclusivo) {
-        return ventaRepository.sumarIngresosEntre(desde.atStartOfDay(), hastaExclusivo.atStartOfDay());
+        BigDecimal ingresos = ventaRepository.sumarIngresosEntre(desde.atStartOfDay(), hastaExclusivo.atStartOfDay()); return ingresos != null ? ingresos : BigDecimal.ZERO;
     }
 
     @Override
@@ -76,3 +76,4 @@ public class ReporteServiceImpl implements ReporteService {
         return ventaRepository.buscarProductosMasVendidos().stream().limit(5).toList();
     }
 }
+

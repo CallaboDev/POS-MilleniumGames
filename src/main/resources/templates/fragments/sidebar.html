@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
 <!-- Fragmento de Sidebar Lateral Izquierdo -->
@@ -46,15 +46,14 @@
             </a>
         </li>
         <!-- Reportes: solo ADMIN -->
-        <li th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
-            <a th:href="@{/dashboard}" class="nav-link-item" title="Reportes">
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/reportes}" class="nav-link-item" title="Reportes">
                 <i class="bi bi-graph-up"></i>
                 <span class="link-text">Reportes</span>
             </a>
         </li>
-        <!-- Usuarios -->
         <!-- Usuarios: solo ADMIN -->
-        <li th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
+        <li sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/usuarios}" class="nav-link-item" title="Usuarios">
                 <i class="bi bi-person-badge"></i>
                 <span class="link-text">Usuarios</span>
@@ -66,6 +65,10 @@
     <div class="sidebar-user">
         <div class="avatar-circle">
             <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="user-details d-flex flex-column">
+            <span class="fw-semibold text-white small lh-1 text-truncate" th:text="${nombreUsuarioLogueado}">Nombre</span>
+            <span class="text-secondary small mt-1" style="font-size: 0.75rem;" sec:authentication="name">Username</span>
         </div>
     </div>
 </aside>
