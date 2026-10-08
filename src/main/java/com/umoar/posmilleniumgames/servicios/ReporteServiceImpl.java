@@ -53,7 +53,8 @@ public class ReporteServiceImpl implements ReporteService {
 
     @Override
     public BigDecimal ingresosEntre(LocalDate desde, LocalDate hastaExclusivo) {
-        BigDecimal ingresos = ventaRepository.sumarIngresosEntre(desde.atStartOfDay(), hastaExclusivo.atStartOfDay()); return ingresos != null ? ingresos : BigDecimal.ZERO;
+        BigDecimal ingresos = ventaRepository.sumarIngresosEntre(desde.atStartOfDay(), hastaExclusivo.atStartOfDay());
+        return ingresos != null ? ingresos : BigDecimal.ZERO;
     }
 
     @Override

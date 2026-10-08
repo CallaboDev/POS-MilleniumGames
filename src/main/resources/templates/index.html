@@ -91,7 +91,7 @@
 
                 <!-- Métrica 3: Ventas del Día (solo ADMIN) -->
                 <div class="col-12 col-sm-6 col-xl-3"
-                     sec:authorize="hasRole('ADMIN')" >
+                     sec:authorize="hasRole('ADMIN')">
                     <div class="metric-card p-3 p-lg-4 h-100 border-start border-4 border-warning">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
@@ -114,7 +114,7 @@
 
                 <!-- Métrica 4: Personal (solo ADMIN) -->
                 <div class="col-12 col-sm-6 col-xl-3"
-                     sec:authorize="hasRole('ADMIN')" >
+                     sec:authorize="hasRole('ADMIN')">
                     <div class="metric-card p-3 p-lg-4 h-100 border-start border-4 border-success">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
@@ -163,7 +163,7 @@
 
                         <!-- 2. Registrar Videojuego (solo ADMIN) -->
                         <div class="col-12 col-sm-6 col-xl-3"
-                             sec:authorize="hasRole('ADMIN')" >
+                             sec:authorize="hasRole('ADMIN')">
                             <a th:href="@{/productos}" class="quick-action-card h-100">
                                 <div class="metric-icon-box bg-primary-subtle text-primary"
                                      style="width: 44px; height: 44px; font-size: 1.25rem;">
@@ -195,9 +195,10 @@
 
                         <!-- 4. Consultar Reportes (solo ADMIN) -->
                         <div class="col-12 col-sm-6 col-xl-3"
-                             sec:authorize="hasRole('ADMIN')" >
+                             sec:authorize="hasRole('ADMIN')">
                             <a th:href="@{/dashboard}" class="quick-action-card h-100">
-                                <div class="metric-icon-box bg-info-subtle text-info" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                                <div class="metric-icon-box bg-info-subtle text-info"
+                                     style="width: 44px; height: 44px; font-size: 1.25rem;">
                                     <i class="bi bi-graph-up"></i>
                                 </div>
                                 <div class="flex-grow-1">
