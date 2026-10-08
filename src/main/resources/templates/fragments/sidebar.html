@@ -45,16 +45,16 @@
                 <span class="link-text">Clientes</span>
             </a>
         </li>
-        <!-- Reportes -->
-        <li>
-            <a th:href="@{/reportes}" class="nav-link-item" title="Reportes">
+        <!-- Reportes: solo ADMIN -->
+        <li th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
+            <a th:href="@{/dashboard}" class="nav-link-item" title="Reportes">
                 <i class="bi bi-graph-up"></i>
                 <span class="link-text">Reportes</span>
             </a>
         </li>
         <!-- Usuarios -->
-        <!-- Este botón solo será visible para la vista del admin -->
-        <li>
+        <!-- Usuarios: solo ADMIN -->
+        <li th:if="${session.usuarioLogueado.rol != null and #strings.toUpperCase(session.usuarioLogueado.rol) == 'ADMIN'}">
             <a th:href="@{/usuarios}" class="nav-link-item" title="Usuarios">
                 <i class="bi bi-person-badge"></i>
                 <span class="link-text">Usuarios</span>
