@@ -5,7 +5,7 @@
 <!-- Fragmento de Sidebar Lateral Izquierdo -->
 <aside th:fragment="sidebar" id="sidebar" class="sidebar">
     <!-- Superior: Marca / Icono distintivo de la tienda o Carrito POS enlazado a /caja -->
-    <a th:href="@{/caja}" class="sidebar-brand">
+    <a th:href="@{/}" class="sidebar-brand">
         <div class="sidebar-brand-icon">
             <i class="bi bi-controller"></i>
         </div>
@@ -67,8 +67,10 @@
             <i class="bi bi-person-fill"></i>
         </div>
         <div class="user-details d-flex flex-column">
-            <span class="fw-semibold text-white small lh-1 text-truncate" th:text="${nombreUsuarioLogueado}">Nombre</span>
-            <span class="text-secondary small mt-1" style="font-size: 0.75rem;" sec:authentication="name">Username</span>
+            <span class="fw-semibold text-white small lh-1 text-truncate"
+                  th:text="${nombreUsuarioLogueado}">Nombre</span>
+            <span class="text-secondary small mt-1" style="font-size: 0.75rem;"
+                  sec:authentication="name">Username</span>
         </div>
     </div>
 </aside>

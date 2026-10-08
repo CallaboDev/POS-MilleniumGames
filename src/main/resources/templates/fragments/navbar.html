@@ -6,7 +6,9 @@
 <header th:fragment="navbar" class="top-navbar px-3 px-lg-4 d-flex align-items-center justify-content-between">
     <!-- Lado Izquierdo: Botón hamburguesa y Título en negrita -->
     <div class="d-flex align-items-center gap-3">
-        <button id="sidebarToggle" class="btn btn-light border rounded-3 p-2 d-flex align-items-center justify-content-center shadow-sm" type="button" aria-label="Alternar barra lateral" style="width: 40px; height: 40px;">
+        <button id="sidebarToggle"
+                class="btn btn-light border rounded-3 p-2 d-flex align-items-center justify-content-center shadow-sm"
+                type="button" aria-label="Alternar barra lateral" style="width: 40px; height: 40px;">
             <i class="bi bi-list fs-5 text-dark"></i>
         </button>
         <h1 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
@@ -18,7 +20,8 @@
     <div class="d-flex align-items-center gap-2 gap-sm-3">
         <!-- Formulario de Salir -->
         <form th:action="@{/logout}" method="post" class="m-0 p-0 d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
+            <button type="submit"
+                    class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Salir</span>
             </button>
