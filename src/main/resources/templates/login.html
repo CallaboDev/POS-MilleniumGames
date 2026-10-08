@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111827">
+    <title>Iniciar sesión | Millenium Games POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<main class="login-card">
+    <div class="brand-mark" aria-hidden="true">M</div>
+    <h1>Bienvenido</h1>
+    <p class="subtitle">Inicio de sesión de Millenium Games POS</p>
+
+    <div class="error" role="alert" th:if="${param.error}">Usuario o contraseña incorrectos</div>
+    <div class="error" role="alert" th:if="${param.denied}">Tu cuenta no tiene permiso para acceder a esa sección.</div>
+    <div class="success" role="alert" th:if="${param.logout}" style="color: green; margin-bottom: 15px;">Has cerrado
+        sesión exitosamente.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <!-- Thymeleaf includes CSRF token automatically when using th:action with POST -->
+        <div class="field">
+            <label for="username">Nombre de Usuario</label>
+            <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+        </div>
+        <div class="field">
+            <label for="password">Contraseña</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit">Iniciar sesión</button>
+    </form>
+</main>
+</body>
+</html>
