@@ -44,7 +44,7 @@
                             <th scope="col" class="px-3 px-md-4">ID</th>
                             <th scope="col">Username</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Rol</th>
+                            <th scope="col">Roles</th>
                             <th scope="col" class="text-end px-3 px-md-4">Acciones</th>
                         </tr>
                         </thead>
@@ -54,9 +54,9 @@
                             <td class="fw-semibold" th:text="${usuario.username}"></td>
                             <td th:text="${usuario.nombre}"></td>
                             <td>
-                                <span class="badge rounded-pill"
-                                      th:classappend="${usuario.rol == 'ADMIN'} ? ' text-bg-primary' : ' text-bg-secondary'"
-                                      th:text="${usuario.rol}"></span>
+                                <span th:each="rol : ${usuario.roles}" class="badge rounded-pill me-1"
+                                      th:classappend="${rol.nombre == 'ROLE_ADMIN'} ? ' text-bg-primary' : ' text-bg-secondary'"
+                                      th:text="${#strings.replace(rol.nombre, 'ROLE_', '')}"></span>
                             </td>
                             <td class="text-end px-3 px-md-4 text-nowrap">
                                 <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}"
@@ -66,7 +66,7 @@
                                 </a>
                                 <a th:href="@{/usuarios/eliminar/{id}(id=${usuario.id})}"
                                    class="btn btn-sm btn-outline-danger rounded-3 ms-1" title="Eliminar"
-                                   onclick="return confirm('¿Seguro que deseas eliminar este empleado?');">
+                                   onclick="return confirm('Seguro que deseas eliminar este empleado?');">
                                     <i class="bi bi-trash"></i>
                                     <span class="d-none d-md-inline">Eliminar</span>
                                 </a>
@@ -74,7 +74,7 @@
                         </tr>
                         <tr th:if="${#lists.isEmpty(usuarios)}">
                             <td colspan="5" class="text-center text-secondary py-5">
-                                No hay empleados registrados todavía.
+                                No hay empleados registrados todava.
                             </td>
                         </tr>
                         </tbody>

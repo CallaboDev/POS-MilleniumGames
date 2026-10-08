@@ -16,11 +16,13 @@
 
     <!-- Lado Derecho: Botón de salir -->
     <div class="d-flex align-items-center gap-2 gap-sm-3">
-        <!-- Botón con borde rojo: Salir -->
-        <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
-            <i class="bi bi-box-arrow-right"></i>
-            <span>Salir</span>
-        </a>
+        <!-- Formulario de Salir -->
+        <form th:action="@{/logout}" method="post" class="m-0 p-0 d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Salir</span>
+            </button>
+        </form>
     </div>
 </header>
 
