@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
@@ -16,8 +16,14 @@
         </h1>
     </div>
 
-    <!-- Lado Derecho: Botón de salir -->
+    <!-- Lado Derecho: Controles -->
     <div class="d-flex align-items-center gap-2 gap-sm-3">
+        <!-- Botón de Modo Oscuro -->
+        <button id="themeToggleBtn" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm" type="button">
+            <i class="bi bi-moon-fill" id="themeIcon"></i>
+            <span class="d-none d-sm-inline" id="themeText">Modo oscuro</span>
+        </button>
+
         <!-- Formulario de Salir -->
         <form th:action="@{/logout}" method="post" class="m-0 p-0 d-inline">
             <button type="submit"

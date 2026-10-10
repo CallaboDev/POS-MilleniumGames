@@ -7,9 +7,17 @@
     <title>Iniciar sesión | Millenium Games POS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap"
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/login.css}">
+    <script>
+        (function() {
+            var theme = localStorage.getItem("theme");
+            if (theme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
 </head>
 <body>
 <main class="login-card">
@@ -19,9 +27,7 @@
 
     <div class="error" role="alert" th:if="${param.error}">Usuario o contraseña incorrectos</div>
     <div class="error" role="alert" th:if="${param.denied}">Tu cuenta no tiene permiso para acceder a esa sección.</div>
-    <div class="success" role="alert" th:if="${param.logout}" style="color: green; margin-bottom: 15px;">Has cerrado
-        sesión exitosamente.
-    </div>
+    <div class="success" role="alert" th:if="${param.logout}">Has cerrado sesión exitosamente.</div>
 
     <form th:action="@{/login}" method="post">
         <!-- Thymeleaf includes CSRF token automatically when using th:action with POST -->

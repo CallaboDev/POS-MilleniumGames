@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="header(titulo)">
     <meta charset="UTF-8">
@@ -20,6 +20,16 @@
 
     <!-- Estilos personalizados para el panel administrativo con sidebar colapsable -->
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <!-- Script Modo Oscuro/Claro (Ejecución temprana) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem("theme");
+            if (theme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
 </head>
 <body>
 </body>
