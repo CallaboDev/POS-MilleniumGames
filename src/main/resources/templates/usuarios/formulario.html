@@ -29,14 +29,14 @@
                     <form th:if="${!esEdicion}" th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
-                                <label for="username" class="form-label fw-semibold">Username</label>
-                                <input id="username" type="text" th:field="*{username}" class="form-control"
-                                       autocomplete="username" maxlength="255" required>
-                            </div>
-                            <div class="col-12 col-md-6">
                                 <label for="nombre" class="form-label fw-semibold">Nombre</label>
                                 <input id="nombre" type="text" th:field="*{nombre}" class="form-control"
                                        autocomplete="name" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="username" class="form-label fw-semibold">Username</label>
+                                <input id="username" type="text" th:field="*{username}" class="form-control"
+                                       autocomplete="username" maxlength="255" required>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="password" class="form-label fw-semibold">Contraseña</label>
@@ -64,14 +64,14 @@
                           th:object="${usuario}" method="post">
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
-                                <label for="username-edit" class="form-label fw-semibold">Username</label>
-                                <input id="username-edit" type="text" th:field="*{username}" class="form-control"
-                                       autocomplete="username" maxlength="255" required>
-                            </div>
-                            <div class="col-12 col-md-6">
                                 <label for="nombre-edit" class="form-label fw-semibold">Nombre</label>
                                 <input id="nombre-edit" type="text" th:field="*{nombre}" class="form-control"
                                        autocomplete="name" maxlength="255" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="username-edit" class="form-label fw-semibold">Username</label>
+                                <input id="username-edit" type="text" th:field="*{username}" class="form-control"
+                                       autocomplete="username" maxlength="255" required>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="password-edit" class="form-label fw-semibold">Nueva contraseña</label>
