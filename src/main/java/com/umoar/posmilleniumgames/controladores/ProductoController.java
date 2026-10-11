@@ -22,6 +22,9 @@ import java.util.UUID;
 @RequestMapping("/productos")
 public class ProductoController {
 
+    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+    private static final String UPLOADS_DIR = "uploads";
+
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
     private final PlataformaService plataformaService;
@@ -75,14 +78,24 @@ public class ProductoController {
         try {
             // Manejo de la subida de imagen local
             if (archivoImagen != null && !archivoImagen.isEmpty()) {
+                // Validar tipo de archivo
+                if (!isValidImageFile(archivoImagen)) {
+                    throw new IllegalArgumentException("Solo se permiten archivos de imagen (JPG, PNG, WEBP).");
+                }
+
+                // Validar tamaño de archivo
+                if (archivoImagen.getSize() > MAX_FILE_SIZE) {
+                    throw new IllegalArgumentException("El archivo no debe exceder 3MB.");
+                }
+
                 String nombreOriginal = archivoImagen.getOriginalFilename();
                 String extension = "";
                 if (nombreOriginal != null && nombreOriginal.contains(".")) {
                     extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
                 }
-                String nombreArchivo = UUID.randomUUID().toString() + extension;
+                String nombreArchivo = UUID.randomUUID() + extension;
 
-                Path directorioUploads = Paths.get("uploads");
+                Path directorioUploads = Paths.get(UPLOADS_DIR);
                 if (!Files.exists(directorioUploads)) {
                     Files.createDirectories(directorioUploads);
                 }
@@ -125,5 +138,18 @@ public class ProductoController {
             redirectAttributes.addFlashAttribute("error", "No se pudo eliminar el producto.");
         }
         return "redirect:/productos";
+    }
+
+    /**
+     * Valida que el archivo sea una imagen con tipo MIME válido.
+     */
+    private boolean isValidImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        return contentType.startsWith("image/jpeg") ||
+                contentType.startsWith("image/png") ||
+                contentType.startsWith("image/webp");
     }
 }

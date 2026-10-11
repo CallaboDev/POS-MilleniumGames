@@ -16,11 +16,13 @@
 
         <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
             <!-- Alert de Notificaciones -->
-            <div th:if="${exito}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4 shadow-sm" role="alert">
+            <div th:if="${exito}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4 shadow-sm"
+                 role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i><span th:text="${exito}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 shadow-sm" role="alert">
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 shadow-sm"
+                 role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -32,7 +34,8 @@
                     <p class="text-secondary mb-0">Gestión de inventario de videojuegos, consolas y accesorios.</p>
                 </div>
                 <div>
-                    <a th:href="@{/productos/nuevo}" class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3">
+                    <a th:href="@{/productos/nuevo}"
+                       class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3">
                         <i class="bi bi-plus-lg"></i>
                         <span>Nuevo Producto</span>
                     </a>
@@ -45,13 +48,17 @@
                     <form th:action="@{/productos}" method="get" class="row g-2 align-items-center">
                         <div class="col-12 col-md-8 col-lg-6">
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                                <input type="text" name="buscar" th:value="${buscar}" class="form-control bg-light border-start-0" placeholder="Buscar por nombre de producto...">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i
+                                        class="bi bi-search"></i></span>
+                                <input type="text" name="buscar" th:value="${buscar}"
+                                       class="form-control bg-light border-start-0"
+                                       placeholder="Buscar por nombre de producto...">
                             </div>
                         </div>
                         <div class="col-12 col-md-4 col-lg-2 d-flex gap-2">
                             <button type="submit" class="btn btn-secondary w-100 fw-semibold">Buscar</button>
-                            <a th:if="${buscar != null}" th:href="@{/productos}" class="btn btn-outline-secondary" title="Limpiar búsqueda"><i class="bi bi-x-lg"></i></a>
+                            <a th:if="${buscar != null}" th:href="@{/productos}" class="btn btn-outline-secondary"
+                               title="Limpiar búsqueda"><i class="bi bi-x-lg"></i></a>
                         </div>
                     </form>
                 </div>
@@ -77,34 +84,75 @@
                             <tbody>
                             <tr th:each="producto : ${productos}">
                                 <td class="ps-4">
-                                    <img th:if="${producto.imagen != null}" th:src="@{'/uploads/' + ${producto.imagen}}" class="rounded border object-fit-cover" style="width: 48px; height: 48px;" alt="Portada">
-                                    <div th:unless="${producto.imagen != null}" class="bg-light rounded border d-flex align-items-center justify-content-center text-muted" style="width: 48px; height: 48px;">
+                                    <img th:if="${producto.imagen != null}" th:src="@{'/uploads/' + ${producto.imagen}}"
+                                         class="rounded border object-fit-cover" style="width: 48px; height: 48px;"
+                                         alt="Portada">
+                                    <div th:unless="${producto.imagen != null}"
+                                         class="bg-light rounded border d-flex align-items-center justify-content-center text-muted"
+                                         style="width: 48px; height: 48px;">
                                         <i class="bi bi-controller fs-4"></i>
                                     </div>
                                 </td>
                                 <td class="fw-semibold text-secondary" th:text="${producto.sku}">SKU-001</td>
                                 <td>
                                     <span class="fw-bold text-dark d-block" th:text="${producto.nombre}">Nombre del Producto</span>
-                                    <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;" th:text="${producto.descripcion}"></small>
+                                    <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;"
+                                           th:text="${producto.descripcion}"></small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" th:text="${producto.categoria != null ? producto.categoria.nombre : 'N/A'}">Categoría</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill"
+                                          th:text="${producto.categoria != null ? producto.categoria.nombre : 'N/A'}">Categoría</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill" th:text="${producto.plataforma != null ? producto.plataforma.nombre : 'N/A'}">Plataforma</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill"
+                                          th:text="${producto.plataforma != null ? producto.plataforma.nombre : 'N/A'}">Plataforma</span>
                                 </td>
-                                <td class="fw-bold text-dark" th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'POINT')}">$0.00</td>
+                                <td class="fw-bold text-dark"
+                                    th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'POINT')}">
+                                    $0.00
+                                </td>
                                 <td>
-                                        <span th:class="${producto.stock > 5 ? 'badge bg-success-subtle text-success' : (producto.stock > 0 ? 'badge bg-warning-subtle text-warning-emphasis' : 'badge bg-danger-subtle text-danger')}"
-                                              th:text="${producto.stock + ' unids.'}">0 unids.</span>
+                                    <span th:class="${producto.stock > 5 ? 'badge bg-success-subtle text-success' : (producto.stock > 0 ? 'badge bg-warning-subtle text-warning-emphasis' : 'badge bg-danger-subtle text-danger')}"
+                                          th:text="${producto.stock + ' unids.'}">0 unids.</span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a th:href="@{'/productos/editar/' + ${producto.id}}" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                    <a th:href="@{'/productos/editar/' + ${producto.id}}"
+                                       class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a th:href="@{'/productos/eliminar/' + ${producto.id}}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de eliminar este producto?');" title="Eliminar">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#modalEliminar' + ${producto.id}">
                                         <i class="bi bi-trash"></i>
-                                    </a>
+                                    </button>
+
+                                    <!-- Modal de Confirmación de Eliminación -->
+                                    <div class="modal fade" th:id="'modalEliminar' + ${producto.id}" tabindex="-1"
+                                         aria-labelledby="modalEliminarLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title" id="modalEliminarLabel">Confirmar
+                                                        Eliminación</h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="mb-0">¿Está seguro de que desea eliminar el producto
+                                                        <strong th:text="${producto.nombre}"></strong>?</p>
+                                                    <p class="text-muted small mt-2">Esta acción no se puede
+                                                        deshacer.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Cancelar
+                                                    </button>
+                                                    <a th:href="@{'/productos/eliminar/' + ${producto.id}}"
+                                                       class="btn btn-danger">Eliminar</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(productos)}">
@@ -121,6 +169,7 @@
 
         <footer th:replace="~{fragments/footer :: footer}"></footer>
     </div>
+
 </div>
 
 </body>

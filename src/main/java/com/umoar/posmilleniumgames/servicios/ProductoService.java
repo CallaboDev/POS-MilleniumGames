@@ -65,6 +65,9 @@ public class ProductoService {
 
     @Transactional
     public void descontarStock(Long id, int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad a descontar debe ser mayor a cero.");
+        }
         Producto producto = obtenerPorId(id);
         if (producto.getStock() < cantidad) {
             throw new IllegalStateException("Stock insuficiente para el producto: " + producto.getNombre());
