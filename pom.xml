@@ -79,7 +79,6 @@
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -138,7 +137,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <version>42.7.14</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
