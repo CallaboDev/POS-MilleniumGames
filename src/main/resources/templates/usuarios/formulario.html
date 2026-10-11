@@ -19,37 +19,60 @@
                 </a>
                 <h1 class="h3 fw-bold text-dark mb-1"
                     th:text="${esEdicion} ? 'Editar empleado' : 'Nuevo empleado'">Nuevo empleado</h1>
-                <p class="text-secondary mb-0">Completa los datos de acceso y asigna un rol.</p>
+                <p class="text-secondary mb-0" th:text="${esEdicion} ? 'Actualiza la información de acceso y el rol del empleado. Los cambios se aplican al guardar.' : 'Completa los datos de acceso y asigna un rol.'">Completa los datos de acceso y asigna un rol.</p>
             </div>
 
             <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}"></div>
 
-            <section class="card border-0 shadow-sm rounded-4" style="max-width: 760px;">
+            <div class="alert alert-info d-flex gap-3 align-items-start mb-4" role="note" th:if="${esEdicion}">
+                <i class="bi bi-info-circle-fill fs-5" aria-hidden="true"></i>
+                <div>
+                    <strong>Estás editando a <span th:text="${usuario.nombre}">empleado</span>.</strong>
+                    <div class="small mt-1">Puedes cambiar su nombre, usuario y rol. Para conservar la contraseña actual, deja el campo de nueva contraseña vacío.</div>
+                    <div class="small mt-1" th:if="${esCuentaPropia}">Esta es tu cuenta. Puedes actualizar tus datos, pero no podrás eliminarla.</div>
+                </div>
+            </div>
+            <div class="alert alert-info d-flex gap-3 align-items-start mb-4" role="note" th:unless="${esEdicion}">
+                <i class="bi bi-person-plus-fill fs-5" aria-hidden="true"></i>
+                <div>
+                    <strong>Vas a crear una nueva cuenta de empleado.</strong>
+                    <div class="small mt-1">Ingresa el nombre y los datos de acceso que utilizará para iniciar sesión.</div>
+                    <div class="small mt-1">La contraseña es obligatoria y se guardará de forma segura.</div>
+                </div>
+            </div>
+
+            <section class="card border-0 shadow-sm rounded-4 w-100" style="max-width: 960px;">
+                <div class="card-header bg-white border-bottom px-3 px-md-4 py-3">
+                    <h2 class="h5 fw-bold mb-1" th:text="${esEdicion} ? 'Información de la cuenta' : 'Datos del nuevo empleado'">Datos del nuevo empleado</h2>
+                    <p class="small text-secondary mb-0">Los campos marcados son obligatorios.</p>
+                </div>
                 <div class="card-body p-3 p-md-4 p-lg-5">
                     <form th:if="${!esEdicion}" th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label for="nombre" class="form-label fw-semibold">Nombre</label>
                                 <input id="nombre" type="text" th:field="*{nombre}" class="form-control"
-                                       autocomplete="name" maxlength="255" required>
+                                       autocomplete="name" maxlength="255" placeholder="Nombre Real Completo" required>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label for="username" class="form-label fw-semibold">Username</label>
+                                <label for="username" class="form-label fw-semibold">Nombre de usuario</label>
                                 <input id="username" type="text" th:field="*{username}" class="form-control"
-                                       autocomplete="username" maxlength="255" required>
+                                       autocomplete="username" maxlength="255" placeholder="Identificador único para iniciar sesión" required>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="password" class="form-label fw-semibold">Contraseña</label>
                                 <input id="password" name="password" type="password" class="form-control"
                                        autocomplete="new-password" required>
+                                <div class="form-text"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Usa una contraseña segura que el empleado pueda recordar.</div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="rol" class="form-label fw-semibold">Rol</label>
                                 <select id="rol" th:field="*{rol}" class="form-select" required>
                                     <option value="" disabled>Selecciona un rol</option>
-                                    <option value="ADMIN">ADMIN</option>
-                                    <option value="CAJERO">CAJERO</option>
+                                    <option value="ADMIN">Administrador</option>
+                                    <option value="CAJERO">Cajero</option>
                                 </select>
+                                <div class="form-text">El rol define las secciones y acciones a las que podrá acceder.</div>
                             </div>
                         </div>
                         <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
@@ -69,7 +92,7 @@
                                        autocomplete="name" maxlength="255" required>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label for="username-edit" class="form-label fw-semibold">Username</label>
+                                <label for="username-edit" class="form-label fw-semibold">Nombre de usuario</label>
                                 <input id="username-edit" type="text" th:field="*{username}" class="form-control"
                                        autocomplete="username" maxlength="255" required>
                             </div>
@@ -77,14 +100,15 @@
                                 <label for="password-edit" class="form-label fw-semibold">Nueva contraseña</label>
                                 <input id="password-edit" name="password" type="password" class="form-control"
                                        autocomplete="new-password" placeholder="Dejar vacía para conservar la actual">
-                                <div class="form-text">La contraseña actual no se muestra. Déjalo vacío si no deseas cambiarla.</div>
+                                <div class="form-text"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>La contraseña actual no se muestra ni se modifica si dejas este campo vacío.</div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="rol-edit" class="form-label fw-semibold">Rol</label>
                                 <select id="rol-edit" th:field="*{rol}" class="form-select" required>
-                                    <option value="ADMIN">ADMIN</option>
-                                    <option value="CAJERO">CAJERO</option>
+                                    <option value="ADMIN">Administrador</option>
+                                    <option value="CAJERO">Cajero</option>
                                 </select>
+                                <div class="form-text">El rol define las secciones y acciones a las que puede acceder.</div>
                             </div>
                         </div>
                         <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
