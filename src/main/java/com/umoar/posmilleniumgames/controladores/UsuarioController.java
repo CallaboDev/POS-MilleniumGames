@@ -3,7 +3,9 @@ package com.umoar.posmilleniumgames.controladores;
 import com.umoar.posmilleniumgames.modelos.Rol;
 import com.umoar.posmilleniumgames.modelos.Usuario;
 import com.umoar.posmilleniumgames.repositorios.RolRepository;
+import com.umoar.posmilleniumgames.servicios.UsuarioDetalles;
 import com.umoar.posmilleniumgames.servicios.UsuarioService;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,8 +30,9 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public String listar(Model model) {
+    public String listar(Model model, Authentication authentication) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
+        model.addAttribute("usuarioActualId", usuarioActualId(authentication));
         return "usuarios/lista";
     }
 
@@ -70,7 +73,8 @@ public class UsuarioController {
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicion(@PathVariable Long id,
                                            Model model,
-                                           RedirectAttributes redirectAttributes) {
+                                           RedirectAttributes redirectAttributes,
+                                           Authentication authentication) {
         Usuario usuario = usuarioService.buscarPorId(id).orElse(null);
         if (usuario == null) {
             redirectAttributes.addFlashAttribute("error", "No se encontr el empleado solicitado.");
@@ -87,6 +91,7 @@ public class UsuarioController {
         }
 
         prepararFormulario(model, form, true);
+        model.addAttribute("esCuentaPropia", Objects.equals(usuarioActualId(authentication), usuario.getId()));
         return "usuarios/formulario";
     }
 
@@ -94,7 +99,8 @@ public class UsuarioController {
     public String actualizar(@PathVariable Long id,
                              @ModelAttribute("usuario") UsuarioForm form,
                              Model model,
-                             RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes,
+                             Authentication authentication) {
         Usuario usuarioActual = usuarioService.buscarPorId(id).orElse(null);
         if (usuarioActual == null) {
             redirectAttributes.addFlashAttribute("error", "No se encontr el empleado solicitado.");
@@ -105,6 +111,7 @@ public class UsuarioController {
         if (error != null) {
             model.addAttribute("error", error);
             prepararFormulario(model, form, true);
+            model.addAttribute("esCuentaPropia", Objects.equals(usuarioActualId(authentication), id));
             return "usuarios/formulario";
         }
 
@@ -113,8 +120,9 @@ public class UsuarioController {
                 .filter(otroUsuario -> !Objects.equals(otroUsuario.getId(), id))
                 .isPresent();
         if (usernameEnUso) {
-            model.addAttribute("error", "Ese username ya est registrado.");
+            model.addAttribute("error", "Ese username ya está registrado.");
             prepararFormulario(model, form, true);
+            model.addAttribute("esCuentaPropia", Objects.equals(usuarioActualId(authentication), id));
             return "usuarios/formulario";
         }
 
@@ -135,11 +143,31 @@ public class UsuarioController {
         return "redirect:/usuarios";
     }
 
-    @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Long id,
+                           Authentication authentication,
+                           RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioService.buscarPorId(id).orElse(null);
+        if (usuario == null) {
+            redirectAttributes.addFlashAttribute("error", "No se encontró el empleado solicitado.");
+            return "redirect:/usuarios";
+        }
+        if (Objects.equals(usuarioActualId(authentication), usuario.getId())) {
+            redirectAttributes.addFlashAttribute("error", "No puedes eliminar tu propia cuenta de administrador.");
+            return "redirect:/usuarios";
+        }
         usuarioService.eliminar(id);
-        redirectAttributes.addFlashAttribute("mensaje", "Empleado eliminado.");
+        redirectAttributes.addFlashAttribute("mensaje", "Empleado eliminado correctamente.");
         return "redirect:/usuarios";
+    }
+
+    private Long usuarioActualId(Authentication authentication) {
+        if (authentication.getPrincipal() instanceof UsuarioDetalles detalles) {
+            return detalles.getUsuario().getId();
+        }
+        return usuarioService.buscarPorUsername(authentication.getName())
+                .map(Usuario::getId)
+                .orElse(null);
     }
 
     private void prepararFormulario(Model model, UsuarioForm form, boolean esEdicion) {
