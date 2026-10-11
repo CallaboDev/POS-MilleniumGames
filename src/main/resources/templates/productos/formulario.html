@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header(${producto.id != null ? 'Editar Producto' : 'Nuevo Producto'})}">
+    <title>Formulario de Producto | Millenium Games POS</title>
+</head>
+
+<body>
+
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+        <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+            <!-- Alert de Error si hay validación fallida -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Header de Sección -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-1" th:text="${producto.id != null ? 'Editar Producto' : 'Registrar Nuevo Producto'}">Formulario Producto</h1>
+                    <p class="text-secondary mb-0">Complete los datos correspondientes para el producto en el catálogo.</p>
+                </div>
+                <div>
+                    <a th:href="@{/productos}" class="btn btn-outline-secondary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Volver al Catálogo</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Formulario Principal -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-body p-4">
+                    <form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="row g-3">
+                            <!-- Código SKU -->
+                            <div class="col-12 col-md-6">
+                                <label for="sku" class="form-label fw-semibold text-dark">Código SKU <span class="text-danger">*</span></label>
+                                <input type="text" id="sku" th:field="*{sku}" class="form-control" placeholder="Ej: PS5-GOW-01" required />
+                            </div>
+
+                            <!-- Nombre -->
+                            <div class="col-12 col-md-6">
+                                <label for="nombre" class="form-label fw-semibold text-dark">Nombre del Producto <span class="text-danger">*</span></label>
+                                <input type="text" id="nombre" th:field="*{nombre}" class="form-control" placeholder="Ej: God of War Ragnarök" required />
+                            </div>
+
+                            <!-- Categoría -->
+                            <div class="col-12 col-md-6">
+                                <label for="categoria" class="form-label fw-semibold text-dark">Categoría <span class="text-danger">*</span></label>
+                                <select id="categoria" th:field="*{categoria.id}" class="form-select" required>
+                                    <option value="">-- Seleccionar Categoría --</option>
+                                    <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nombre}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Plataforma -->
+                            <div class="col-12 col-md-6">
+                                <label for="plataforma" class="form-label fw-semibold text-dark">Plataforma <span class="text-danger">*</span></label>
+                                <select id="plataforma" th:field="*{plataforma.id}" class="form-select" required>
+                                    <option value="">-- Seleccionar Plataforma --</option>
+                                    <option th:each="plat : ${plataformas}" th:value="${plat.id}" th:text="${plat.nombre}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="col-12 col-md-6">
+                                <label for="precio" class="form-label fw-semibold text-dark">Precio ($) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" id="precio" th:field="*{precio}" class="form-control" placeholder="0.00" required />
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="col-12 col-md-6">
+                                <label for="stock" class="form-label fw-semibold text-dark">Stock Inicial / Disponible <span class="text-danger">*</span></label>
+                                <input type="number" min="0" id="stock" th:field="*{stock}" class="form-control" placeholder="0" required />
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label fw-semibold text-dark">Descripción</label>
+                                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="3" placeholder="Detalles o especificaciones del videojuego/consola..."></textarea>
+                            </div>
+
+                            <!-- Subida de Imagen -->
+                            <div class="col-12">
+                                <label for="archivoImagen" class="form-label fw-semibold text-dark">Foto de la Portada</label>
+                                <input type="file" id="archivoImagen" name="archivoImagen" class="form-control" accept="image/*" />
+                                <div class="form-text">Formatos permitidos: JPG, PNG, WEBP (Máx 3MB).</div>
+                            </div>
+
+                            <!-- Vista Previa de Imagen Actual si existe -->
+                            <div th:if="${producto.imagen != null}" class="col-12">
+                                <label class="form-label fw-semibold text-dark d-block">Portada Actual:</label>
+                                <img th:src="@{'/uploads/' + ${producto.imagen}}" class="rounded border object-fit-cover shadow-sm" style="width: 100px; height: 100px;" alt="Portada Actual">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/productos}" class="btn btn-light border px-4 fw-semibold">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Producto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+
+</body>
+</html>
