@@ -19,6 +19,6 @@ class HomeControllerTest {
     void testIndexEndpoint() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"));
+                .andExpect(view().name("dashboard/index"));
     }
 }

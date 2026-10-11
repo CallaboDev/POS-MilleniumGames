@@ -19,8 +19,8 @@ public class HomeController {
 
     @GetMapping("/")
     public String index() {
-        // Renderiza templates/index.html
-        return "index";
+        // Renderiza templates/dashboard/index.html
+        return "dashboard/index";
     }
 
     @GetMapping("/dashboard")
@@ -32,7 +32,7 @@ public class HomeController {
         model.addAttribute("totalVentas", reporteService.totalVentas());
         model.addAttribute("productosPorAgotarse", reporteService.totalProductosConStockCritico());
         model.addAttribute("stockCritico", reporteService.productosConStockCritico());
-        return "dashboard";
+        return "dashboard/dashboard";
     }
 
     @GetMapping("/reportes")
@@ -63,6 +63,6 @@ public class HomeController {
         model.addAttribute("stockCritico", reporteService.productosConStockCritico());
         model.addAttribute("productosMasVendidos", reporteService.productosMasVendidos());
 
-        return "reportes";
+        return "ventas/reportes";
     }
 }

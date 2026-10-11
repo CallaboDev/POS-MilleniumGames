@@ -45,7 +45,7 @@ public class ProductoController {
         } else {
             model.addAttribute("productos", productoService.obtenerTodos());
         }
-        return "productos/lista";
+        return "inventario/lista";
     }
 
     @GetMapping("/nuevo")
@@ -53,7 +53,7 @@ public class ProductoController {
         model.addAttribute("producto", new Producto());
         model.addAttribute("categorias", categoriaService.obtenerTodas());
         model.addAttribute("plataformas", plataformaService.obtenerTodas());
-        return "productos/formulario";
+        return "inventario/formulario";
     }
 
     @GetMapping("/editar/{id}")
@@ -63,7 +63,7 @@ public class ProductoController {
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categoriaService.obtenerTodas());
             model.addAttribute("plataformas", plataformaService.obtenerTodas());
-            return "productos/formulario";
+            return "inventario/formulario";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/productos";
@@ -119,13 +119,13 @@ public class ProductoController {
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categoriaService.obtenerTodas());
             model.addAttribute("plataformas", plataformaService.obtenerTodas());
-            return "productos/formulario";
+            return "inventario/formulario";
         } catch (IOException e) {
             model.addAttribute("error", "Error al guardar el archivo de la imagen.");
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categoriaService.obtenerTodas());
             model.addAttribute("plataformas", plataformaService.obtenerTodas());
-            return "productos/formulario";
+            return "inventario/formulario";
         }
     }
 
