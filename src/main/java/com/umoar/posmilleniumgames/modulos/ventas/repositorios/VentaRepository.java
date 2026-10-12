@@ -8,8 +8,23 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface VentaRepository extends JpaRepository<Venta, Long> {
+
+    Optional<Venta> findByNumeroFactura(String numeroFactura);
+
+    Optional<Venta> findTopByOrderByIdDesc();
+
+    boolean existsByNumeroFactura(String numeroFactura);
+
+    @Query("select v from Venta v " +
+           "left join fetch v.cliente " +
+           "left join fetch v.usuario " +
+           "left join fetch v.detalles d " +
+           "left join fetch d.producto " +
+           "where v.id = :id")
+    Optional<Venta> buscarPorIdConDetalles(@Param("id") Long id);
 
     @Query("select coalesce(sum(v.total), 0) from Venta v where v.fechaHora >= :inicio and v.fechaHora < :fin")
     BigDecimal sumarIngresosEntre(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);

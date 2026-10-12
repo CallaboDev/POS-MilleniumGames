@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Ticket ' + ${venta.numeroFactura} + ' | Millenium Games POS'">Comprobante de Venta | Millenium Games POS</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        .ticket-card {
+            max-width: 420px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 28px 24px;
+            font-family: 'Courier Prime', monospace, monospace;
+            color: #000000;
+        }
+
+        .ticket-divider {
+            border-top: 1px dashed #475569;
+            margin: 12px 0;
+        }
+
+        .ticket-table th, .ticket-table td {
+            padding: 4px 0;
+            font-size: 0.88rem;
+        }
+
+        /* Estilos específicos para impresión física / térmica */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .ticket-card {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            @page {
+                size: auto;
+                margin: 5mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- Barra de acciones en pantalla (Oculta al imprimir) -->
+    <div class="no-print d-flex justify-content-center gap-2 mb-4">
+        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
+                onclick="window.print()">
+            <i class="bi bi-printer-fill fs-5"></i>
+            <span>Imprimir Ticket</span>
+        </button>
+        <a th:href="@{/caja}" class="btn btn-outline-secondary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3 bg-white">
+            <i class="bi bi-cart-plus"></i>
+            <span>Nueva Venta</span>
+        </a>
+        <a th:href="@{/}" class="btn btn-outline-dark px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3 bg-white">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Contenido del Comprobante / Ticket -->
+    <div class="ticket-card">
+        <!-- Encabezado de la Tienda -->
+        <div class="text-center">
+            <h4 class="fw-bold mb-0 text-uppercase" style="letter-spacing: 1px;">🎮 MILLENIUM GAMES</h4>
+            <div style="font-size: 0.85rem;" class="text-muted mt-1">Terminal POS - Videojuegos & Accesorios</div>
+            <div style="font-size: 0.80rem;" class="text-muted">Sucursal Principal - San Salvador</div>
+            <div style="font-size: 0.80rem;" class="text-muted">Tel: +503 2222-0000 | NIT: 0614-010190-102-1</div>
+        </div>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Metadatos de la Venta -->
+        <div style="font-size: 0.85rem;">
+            <div class="d-flex justify-content-between">
+                <span>COMPROBANTE:</span>
+                <strong th:text="${venta.numeroFactura}">FAC-00001</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>FECHA:</span>
+                <span th:text="${#temporals.format(venta.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">11/10/2026 12:45:00</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>CAJERO:</span>
+                <span th:text="${venta.usuario != null ? venta.usuario.nombre : 'Caja Principal'}">Cajero</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>CLIENTE:</span>
+                <span th:text="${venta.cliente != null ? venta.cliente.nombreCompleto : 'Consumidor Final'}">Consumidor Final</span>
+            </div>
+            <div th:if="${venta.cliente != null and venta.cliente.telefono != null and venta.cliente.telefono != 'N/A'}" class="d-flex justify-content-between">
+                <span>TEL:</span>
+                <span th:text="${venta.cliente.telefono}">7890-1234</span>
+            </div>
+        </div>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Detalle de Artículos -->
+        <table class="w-100 ticket-table">
+            <thead>
+            <tr class="border-bottom border-dark">
+                <th class="text-start" style="width: 15%;">CANT</th>
+                <th class="text-start" style="width: 50%;">DESCRIPCIÓN</th>
+                <th class="text-end" style="width: 17%;">P.U.</th>
+                <th class="text-end" style="width: 18%;">SUBT</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="det : ${venta.detalles}">
+                <td class="text-start" th:text="${det.cantidad}">1</td>
+                <td class="text-start text-truncate" style="max-width: 150px;" th:text="${det.producto != null ? det.producto.nombre : 'Producto'}">
+                    Juego
+                </td>
+                <td class="text-end" th:text="${'$' + #numbers.formatDecimal(det.precioUnitario, 1, 'POINT', 2, 'POINT')}">$0.00</td>
+                <td class="text-end fw-bold" th:text="${'$' + #numbers.formatDecimal(det.subtotal, 1, 'POINT', 2, 'POINT')}">$0.00</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Totales y Pago -->
+        <div style="font-size: 0.95rem;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span>MÉTODO DE PAGO:</span>
+                <span class="fw-bold" th:text="${venta.metodoPago}">EFECTIVO</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center fs-5 fw-bold mt-2 pt-1 border-top border-dark">
+                <span>TOTAL A PAGAR:</span>
+                <span th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'POINT', 2, 'POINT')}">$0.00</span>
+            </div>
+        </div>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Pie de Ticket y Políticas -->
+        <div class="text-center mt-3" style="font-size: 0.78rem;">
+            <p class="mb-1 fw-bold">¡GRACIAS POR TU COMPRA!</p>
+            <p class="mb-1 text-muted">Conserva este ticket para cualquier reclamo o garantía.</p>
+            <p class="mb-0 text-muted">Garantía de 30 días en videojuegos físicos y accesorios con empaque original.</p>
+            <div class="mt-2 text-muted" style="letter-spacing: 2px;">*** MILLENIUM GAMES POS ***</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

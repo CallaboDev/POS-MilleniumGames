@@ -25,8 +25,26 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**").permitAll()
                         .requestMatchers("/login", "/logout").permitAll()
-                        .requestMatchers("/reportes/**", "/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers("/", "/dashboard", "/caja/**", "/productos/**").authenticated()
+                        .requestMatchers(
+                                "/reportes/**",
+                                "/usuarios/**",
+                                "/productos/nuevo",
+                                "/productos/guardar",
+                                "/productos/editar/**",
+                                "/productos/eliminar/**",
+                                "/categorias/**",
+                                "/plataformas/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                "/",
+                                "/dashboard",
+                                "/caja",
+                                "/caja/**",
+                                "/ventas",
+                                "/ventas/**",
+                                "/productos",
+                                "/clientes/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
