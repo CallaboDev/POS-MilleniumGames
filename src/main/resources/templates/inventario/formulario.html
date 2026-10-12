@@ -15,7 +15,16 @@
         <header th:replace="~{fragments/navbar :: navbar}"></header>
 
         <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
-            <!-- Alert de Error si hay validación fallida -->
+            <!-- Tokens CSRF para peticiones seguras -->
+            <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
+            <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" />
+
+            <!-- Alert de Notificaciones -->
+            <div th:if="${exito}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4 shadow-sm"
+                 role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i><span th:text="${exito}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 shadow-sm"
                  role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
@@ -31,7 +40,17 @@
                     <p class="text-secondary mb-0">Complete los datos correspondientes para el producto en el
                         catálogo.</p>
                 </div>
-                <div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3 shadow-sm bg-white"
+                            data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
+                        <i class="bi bi-tag-fill"></i>
+                        <span>+ Categoría</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3 shadow-sm bg-white"
+                            data-bs-toggle="modal" data-bs-target="#modalNuevaPlataforma">
+                        <i class="bi bi-controller"></i>
+                        <span>+ Plataforma</span>
+                    </button>
                     <a th:href="@{/productos}"
                        class="btn btn-outline-secondary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 rounded-3">
                         <i class="bi bi-arrow-left"></i>
@@ -64,10 +83,16 @@
                                        placeholder="Ej: God of War Ragnarök" required/>
                             </div>
 
-                            <!-- Categoría -->
+                            <!-- Categoría con botón para agregar nueva -->
                             <div class="col-12 col-md-6">
-                                <label for="categoria" class="form-label fw-semibold text-dark">Categoría <span
-                                        class="text-danger">*</span></label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="categoria" class="form-label fw-semibold text-dark mb-0">Categoría <span
+                                            class="text-danger">*</span></label>
+                                    <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold text-primary"
+                                            data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
+                                        <i class="bi bi-plus-circle-fill me-1"></i>+ Nueva Categoría
+                                    </button>
+                                </div>
                                 <select id="categoria" th:field="*{categoria.id}" class="form-select" required>
                                     <option value="">-- Seleccionar Categoría --</option>
                                     <option th:each="cat : ${categorias}" th:value="${cat.id}"
@@ -75,10 +100,16 @@
                                 </select>
                             </div>
 
-                            <!-- Plataforma -->
+                            <!-- Plataforma con botón para agregar nueva -->
                             <div class="col-12 col-md-6">
-                                <label for="plataforma" class="form-label fw-semibold text-dark">Plataforma <span
-                                        class="text-danger">*</span></label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="plataforma" class="form-label fw-semibold text-dark mb-0">Plataforma <span
+                                            class="text-danger">*</span></label>
+                                    <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold text-primary"
+                                            data-bs-toggle="modal" data-bs-target="#modalNuevaPlataforma">
+                                        <i class="bi bi-plus-circle-fill me-1"></i>+ Nueva Plataforma
+                                    </button>
+                                </div>
                                 <select id="plataforma" th:field="*{plataforma.id}" class="form-select" required>
                                     <option value="">-- Seleccionar Plataforma --</option>
                                     <option th:each="plat : ${plataformas}" th:value="${plat.id}"
@@ -148,8 +179,73 @@
 
 </div>
 
-<!-- Script para validación de archivos en el cliente -->
+<!-- Modal: Nueva Categoría -->
+<div class="modal fade" id="modalNuevaCategoria" tabindex="-1" aria-labelledby="modalNuevaCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formNuevaCategoria" th:action="@{/categorias/guardar}" method="post">
+                <input type="hidden" name="redirectUrl" th:value="${producto.id != null ? '/productos/editar/' + producto.id : '/productos/nuevo'}" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalNuevaCategoriaLabel">
+                        <i class="bi bi-tag-fill text-primary me-2"></i>Registrar Nueva Categoría
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="inputNombreCategoria" class="form-label fw-semibold">Nombre de la Categoría <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="inputNombreCategoria" name="nombre"
+                               placeholder="Ej: Accesorios, Coleccionables, Merchandising" required autocomplete="off">
+                    </div>
+                    <div id="errorCategoriaModal" class="alert alert-danger py-2 small d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary fw-semibold" id="btnGuardarCategoriaAjax" onclick="guardarCategoriaAjax()">
+                        <i class="bi bi-save me-1"></i> Guardar Categoría
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nueva Plataforma -->
+<div class="modal fade" id="modalNuevaPlataforma" tabindex="-1" aria-labelledby="modalNuevaPlataformaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formNuevaPlataforma" th:action="@{/plataformas/guardar}" method="post">
+                <input type="hidden" name="redirectUrl" th:value="${producto.id != null ? '/productos/editar/' + producto.id : '/productos/nuevo'}" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalNuevaPlataformaLabel">
+                        <i class="bi bi-controller text-primary me-2"></i>Registrar Nueva Plataforma
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="inputNombrePlataforma" class="form-label fw-semibold">Nombre de la Plataforma <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="inputNombrePlataforma" name="nombre"
+                               placeholder="Ej: Nintendo Switch, PlayStation 5, Steam Deck" required autocomplete="off">
+                    </div>
+                    <div id="errorPlataformaModal" class="alert alert-danger py-2 small d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary fw-semibold" id="btnGuardarPlataformaAjax" onclick="guardarPlataformaAjax()">
+                        <i class="bi bi-save me-1"></i> Guardar Plataforma
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para validación de archivos en el cliente y creación interactiva de categorías/plataformas -->
 <script>
+    const csrfToken = document.getElementById('csrfToken') ? document.getElementById('csrfToken').value : '';
+    const csrfHeader = document.getElementById('csrfHeader') ? document.getElementById('csrfHeader').value : 'X-CSRF-TOKEN';
+
     document.getElementById('archivoImagen').addEventListener('change', function (e) {
         const file = e.target.files[0];
         const maxSize = 3 * 1024 * 1024; // 3MB
@@ -165,7 +261,6 @@
             if (file.size > maxSize) {
                 alert('El archivo no debe exceder 3MB.');
                 e.target.value = '';
-
             }
         }
     });
@@ -187,6 +282,112 @@
             return false;
         }
     });
+
+    // Guardado AJAX interactivo de Categoría (sin recargar ni perder los campos ya llenos)
+    async function guardarCategoriaAjax() {
+        const input = document.getElementById('inputNombreCategoria');
+        const errorDiv = document.getElementById('errorCategoriaModal');
+        const nombre = input.value.trim();
+
+        if (!nombre) {
+            errorDiv.textContent = 'El nombre de la categoría es requerido.';
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarCategoriaAjax');
+        btn.disabled = true;
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken) headers[csrfHeader] = csrfToken;
+
+            const res = await fetch('/categorias/api/guardar', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ nombre: nombre })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                // Agregar al select y seleccionarlo
+                const selectCat = document.getElementById('categoria');
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.nombre;
+                option.selected = true;
+                selectCat.appendChild(option);
+
+                // Cerrar modal
+                const modalEl = document.getElementById('modalNuevaCategoria');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+                input.value = '';
+                errorDiv.classList.add('d-none');
+            } else {
+                errorDiv.textContent = data.mensaje || 'Error al guardar la categoría.';
+                errorDiv.classList.remove('d-none');
+            }
+        } catch (e) {
+            // Si falla AJAX, enviar el formulario tradicional
+            document.getElementById('formNuevaCategoria').submit();
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Guardado AJAX interactivo de Plataforma (sin recargar ni perder los campos ya llenos)
+    async function guardarPlataformaAjax() {
+        const input = document.getElementById('inputNombrePlataforma');
+        const errorDiv = document.getElementById('errorPlataformaModal');
+        const nombre = input.value.trim();
+
+        if (!nombre) {
+            errorDiv.textContent = 'El nombre de la plataforma es requerido.';
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarPlataformaAjax');
+        btn.disabled = true;
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken) headers[csrfHeader] = csrfToken;
+
+            const res = await fetch('/plataformas/api/guardar', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ nombre: nombre })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                // Agregar al select y seleccionarlo
+                const selectPlat = document.getElementById('plataforma');
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.nombre;
+                option.selected = true;
+                selectPlat.appendChild(option);
+
+                // Cerrar modal
+                const modalEl = document.getElementById('modalNuevaPlataforma');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+                input.value = '';
+                errorDiv.classList.add('d-none');
+            } else {
+                errorDiv.textContent = data.mensaje || 'Error al guardar la plataforma.';
+                errorDiv.classList.remove('d-none');
+            }
+        } catch (e) {
+            // Si falla AJAX, enviar el formulario tradicional
+            document.getElementById('formNuevaPlataforma').submit();
+        } finally {
+            btn.disabled = false;
+        }
+    }
 </script>
 
 </body>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Punto de Venta - Caja')}">
+    <title>Punto de Venta - Caja | Millenium Games POS</title>
+</head>
+
+<body>
+
+<style>
+    .pago-efectivo-seleccionado,
+    .pago-efectivo-seleccionado *,
+    .btn-primary.pago-efectivo-seleccionado,
+    .btn-primary.pago-efectivo-seleccionado * {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+    }
+    .product-item:hover {
+        border-color: var(--enterprise-primary) !important;
+        box-shadow: 0 4px 14px rgba(13, 110, 253, 0.15) !important;
+    }
+</style>
+
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+        <main class="p-3 p-md-4 p-xl-4 flex-grow-1">
+            <!-- Tokens CSRF para peticiones seguras -->
+            <input type="hidden" id="csrfToken" th:value="${_csrf != null ? _csrf.token : ''}" />
+            <input type="hidden" id="csrfHeader" th:value="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}" />
+
+            <!-- Alertas dinámicas -->
+            <div id="cajaAlertContainer">
+                <div th:if="${exito}" class="alert alert-success alert-dismissible fade show rounded-3 mb-3 shadow-sm" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${exito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            </div>
+
+            <!-- Título y barra superior de caja -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 pb-2 border-bottom">
+                <div>
+                    <h1 class="h4 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                        <i class="bi bi-cart-fill text-primary"></i> Punto de Venta (Terminal POS)
+                    </h1>
+                    <p class="text-secondary small mb-0">
+                        Búsqueda y escaneo de productos, armado de ticket y cobro inmediato en caja.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6 rounded-pill">
+                        <i class="bi bi-receipt me-1"></i> Factura: <strong th:text="${proximoNumeroFactura}">FAC-00001</strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pantalla dividida: Catálogo (Izquierda) y Carrito/Ticket (Derecha) -->
+            <div class="row g-3">
+                <!-- PANEL IZQUIERDO: Buscador y Catálogo de Videojuegos -->
+                <div class="col-12 col-xl-7">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+                        <div class="card-body p-3 p-md-4 d-flex flex-column">
+                            <!-- Buscador Rápido y Escáner de SKU -->
+                            <div class="mb-3">
+                                <label for="buscadorInput" class="form-label fw-bold text-dark small mb-1">
+                                    <i class="bi bi-upc-scan me-1 text-primary"></i> Búsqueda por SKU o Nombre (Escáner de Código de Barras)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" id="buscadorInput" class="form-control bg-light border-start-0"
+                                           placeholder="Escanear SKU o escribir nombre del juego..."
+                                           autocomplete="off" autofocus>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnLimpiarBusqueda" title="Limpiar búsqueda">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.78rem;">
+                                    Tip: Puedes presionar <strong>Enter</strong> tras escribir o escanear el SKU para agregarlo directamente.
+                                </small>
+                            </div>
+
+                            <!-- Listado de Catálogo en Grid con Scroll -->
+                            <div class="catalogo-scroll flex-grow-1" style="max-height: 560px; overflow-y: auto; overflow-x: hidden; padding-right: 4px;">
+                                <div class="row g-2" id="gridProductos">
+                                    <div class="col-12 col-sm-6 col-md-4 producto-card-wrapper"
+                                         th:each="prod : ${productos}"
+                                         th:data-id="${prod.id}"
+                                         th:data-sku="${prod.sku}"
+                                         th:data-nombre="${prod.nombre}"
+                                         th:data-precio="${prod.precio}"
+                                         th:data-stock="${prod.stock}">
+                                        <div class="card h-100 border border-light-subtle rounded-3 shadow-none p-2 d-flex flex-column justify-content-between position-relative product-item"
+                                             th:classappend="${prod.stock <= 0} ? 'opacity-50' : ''"
+                                             th:styleappend="${prod.stock > 0} ? 'cursor: pointer;' : ''"
+                                             onclick="agregarAlCarritoDesdeCard(this)">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <div class="flex-shrink-0">
+                                                        <img th:if="${prod.imagen != null}" th:src="@{'/uploads/' + ${prod.imagen}}"
+                                                             class="rounded border object-fit-cover" style="width: 44px; height: 44px;"
+                                                             alt="Portada">
+                                                        <div th:unless="${prod.imagen != null}"
+                                                             class="bg-light rounded border d-flex align-items-center justify-content-center text-muted"
+                                                             style="width: 44px; height: 44px;">
+                                                            <i class="bi bi-controller fs-5"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="overflow-hidden">
+                                                        <span class="badge bg-light text-secondary border small py-0 px-1 text-truncate d-inline-block"
+                                                              style="font-size: 0.7rem; max-width: 100%;" th:text="${prod.sku}">SKU</span>
+                                                        <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size: 0.85rem;"
+                                                            th:text="${prod.nombre}">Nombre</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                                    <span class="badge bg-secondary-subtle text-secondary py-0"
+                                                          th:text="${prod.plataforma != null ? prod.plataforma.nombre : 'General'}">Plat</span>
+                                                    <span th:class="${prod.stock > 5 ? 'text-success fw-semibold' : (prod.stock > 0 ? 'text-warning fw-semibold' : 'text-danger fw-bold')}"
+                                                          style="font-size: 0.75rem;">
+                                                        <span th:text="${prod.stock}">0</span> disp.
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
+                                                <span class="fw-bold text-dark fs-6"
+                                                      th:text="${'$' + #numbers.formatDecimal(prod.precio, 1, 'POINT', 2, 'POINT')}">$0.00</span>
+                                                <button type="button" class="btn btn-sm btn-primary rounded-2 px-2 py-1 btn-agregar-item text-white"
+                                                        th:disabled="${prod.stock <= 0}"
+                                                        onclick="event.stopPropagation(); agregarAlCarritoDesdeCard(this);">
+                                                    <i class="bi bi-plus-lg text-white"></i> <span class="text-white">Agregar</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mensaje si no hay productos -->
+                                    <div class="col-12 text-center py-5 text-muted" th:if="${#lists.isEmpty(productos)}" id="sinProductosMsg">
+                                        <i class="bi bi-box-seam fs-1 d-block mb-2 text-secondary"></i>
+                                        No hay productos registrados en el inventario.
+                                    </div>
+                                    <div class="col-12 text-center py-5 text-muted d-none" id="sinCoincidenciasMsg">
+                                        <i class="bi bi-search fs-1 d-block mb-2 text-secondary"></i>
+                                        No se encontraron coincidencias para la búsqueda.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL DERECHO: Carrito, Totales y Cobro -->
+                <div class="col-12 col-xl-5">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column">
+                        <div class="card-header bg-white border-bottom p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h2 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                    <i class="bi bi-receipt-cutoff text-primary"></i> Detalle del Ticket
+                                </h2>
+                                <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" id="btnVaciarCarrito"
+                                        onclick="vaciarCarrito()" title="Vaciar todos los artículos">
+                                    <i class="bi bi-trash3"></i> Limpiar
+                                </button>
+                            </div>
+
+                            <!-- Selector de Cliente -->
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light border-end-0 text-muted">
+                                            <i class="bi bi-person-fill"></i>
+                                        </span>
+                                        <select id="selectCliente" class="form-select bg-light border-start-0">
+                                            <option th:if="${consumidorFinal != null}" th:value="${consumidorFinal.id}" selected>
+                                                Consumidor Final
+                                            </option>
+                                            <option th:each="c : ${clientes}"
+                                                    th:if="${consumidorFinal == null or c.id != consumidorFinal.id}"
+                                                    th:value="${c.id}"
+                                                    th:text="${c.nombreCompleto + (c.telefono != null ? ' (' + c.telefono + ')' : '')}">
+                                                Cliente
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla dinámica del carrito -->
+                        <div class="card-body p-0 flex-grow-1" style="max-height: 280px; overflow-y: auto;">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                    <tr>
+                                        <th class="ps-3">Ítem</th>
+                                        <th class="text-center" style="width: 110px;">Cant.</th>
+                                        <th class="text-end">P.Unit</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th class="text-center pe-3" style="width: 40px;"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="carritoTbody">
+                                    <!-- Render dinámico desde JS -->
+                                    <tr id="carritoVacioRow">
+                                        <td colspan="5" class="text-center py-5 text-muted small">
+                                            <i class="bi bi-cart-x fs-2 d-block mb-1 text-secondary opacity-50"></i>
+                                            El carrito está vacío.<br>Selecciona o presiona "Agregar" a la izquierda.
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Resumen Financiero y Método de Pago -->
+                        <div class="card-footer bg-light border-top p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-secondary small">Artículos:</span>
+                                <span class="fw-semibold text-dark small" id="cantArticulosBadge">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <span class="h5 fw-bold text-dark mb-0">Total a Pagar:</span>
+                                <span class="h3 fw-bolder text-primary mb-0" id="totalPagarDisplay">$0.00</span>
+                            </div>
+
+                            <!-- Selector de Método de Pago: Único método habilitado es EFECTIVO -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark mb-1 d-block">Método de Pago:</label>
+                                <div class="w-100">
+                                    <input type="radio" class="btn-check" name="metodoPago" id="metodoEfectivo" value="EFECTIVO" checked autocomplete="off">
+                                    <label class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm rounded-3 pago-efectivo-seleccionado"
+                                           for="metodoEfectivo"
+                                           style="background-color: #0d6efd !important; border-color: #0d6efd !important; color: #ffffff !important;">
+                                        <i class="bi bi-cash-stack fs-5" style="color: #ffffff !important;"></i>
+                                        <span class="fw-bold fs-6" style="color: #ffffff !important;">Efectivo</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Calculador de Cambio (Efectivo) -->
+                            <div id="seccionEfectivo" class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="montoRecibidoInput" class="form-label small fw-semibold text-dark mb-1">Monto Recibido</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control" id="montoRecibidoInput"
+                                               placeholder="0.00" oninput="calcularCambio()">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Cambio / Vuelto</label>
+                                    <div class="form-control form-control-sm bg-white fw-bold text-success border" id="cambioDisplay">
+                                        $0.00
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón Principal de Cobro -->
+                            <button type="button" class="btn btn-primary btn-lg w-100 fw-bold py-2 shadow-sm rounded-3 d-flex align-items-center justify-content-center gap-2 text-white"
+                                    id="btnCobrar" onclick="procesarCobro()" disabled>
+                                <i class="bi bi-check-circle-fill fs-5 text-white"></i>
+                                <span class="text-white">COBRAR Y EMITIR TICKET</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+
+<!-- Lógica JavaScript del Punto de Venta (Carrito, Escáner, Totales y Transacción) -->
+<script>
+    // Carrito de compras en memoria
+    let carrito = [];
+
+    // Referencias a elementos del DOM
+    const buscadorInput = document.getElementById('buscadorInput');
+    const btnLimpiarBusqueda = document.getElementById('btnLimpiarBusqueda');
+    const gridProductos = document.getElementById('gridProductos');
+    const carritoTbody = document.getElementById('carritoTbody');
+    const totalPagarDisplay = document.getElementById('totalPagarDisplay');
+    const cantArticulosBadge = document.getElementById('cantArticulosBadge');
+    const btnCobrar = document.getElementById('btnCobrar');
+    const selectCliente = document.getElementById('selectCliente');
+    const montoRecibidoInput = document.getElementById('montoRecibidoInput');
+    const cambioDisplay = document.getElementById('cambioDisplay');
+    const seccionEfectivo = document.getElementById('seccionEfectivo');
+    const sinCoincidenciasMsg = document.getElementById('sinCoincidenciasMsg');
+
+    const csrfToken = document.getElementById('csrfToken') ? document.getElementById('csrfToken').value : '';
+    const csrfHeader = document.getElementById('csrfHeader') ? document.getElementById('csrfHeader').value : 'X-CSRF-TOKEN';
+
+    // Búsqueda en vivo y soporte de lector de código de barras
+    if (buscadorInput) {
+        buscadorInput.addEventListener('input', filtrarProductosEnVivo);
+
+        buscadorInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const termino = buscadorInput.value.trim().toLowerCase();
+                if (!termino) return;
+
+                // Buscar coincidencia exacta por SKU
+                const tarjetas = document.querySelectorAll('.producto-card-wrapper');
+                let encontradoExacto = null;
+                let visibles = [];
+
+                tarjetas.forEach(t => {
+                    const sku = (t.dataset.sku || '').toLowerCase();
+                    if (sku === termino) {
+                        encontradoExacto = t;
+                    }
+                    if (t.style.display !== 'none') {
+                        visibles.push(t);
+                    }
+                });
+
+                if (encontradoExacto) {
+                    agregarDesdeElemento(encontradoExacto);
+                    buscadorInput.value = '';
+                    filtrarProductosEnVivo();
+                } else if (visibles.length === 1) {
+                    agregarDesdeElemento(visibles[0]);
+                    buscadorInput.value = '';
+                    filtrarProductosEnVivo();
+                }
+            }
+        });
+    }
+
+    if (btnLimpiarBusqueda) {
+        btnLimpiarBusqueda.addEventListener('click', function() {
+            if (buscadorInput) {
+                buscadorInput.value = '';
+                filtrarProductosEnVivo();
+                buscadorInput.focus();
+            }
+        });
+    }
+
+    function filtrarProductosEnVivo() {
+        if (!buscadorInput) return;
+        const query = buscadorInput.value.trim().toLowerCase();
+        const tarjetas = document.querySelectorAll('.producto-card-wrapper');
+        let encontrados = 0;
+
+        tarjetas.forEach(tarjeta => {
+            const nombre = (tarjeta.dataset.nombre || '').toLowerCase();
+            const sku = (tarjeta.dataset.sku || '').toLowerCase();
+
+            if (nombre.includes(query) || sku.includes(query)) {
+                tarjeta.style.display = '';
+                encontrados++;
+            } else {
+                tarjeta.style.display = 'none';
+            }
+        });
+
+        if (sinCoincidenciasMsg) {
+            if (encontrados === 0 && query.length > 0) {
+                sinCoincidenciasMsg.classList.remove('d-none');
+            } else {
+                sinCoincidenciasMsg.classList.add('d-none');
+            }
+        }
+    }
+
+    function agregarAlCarritoDesdeCard(el) {
+        const wrapper = el.closest('.producto-card-wrapper');
+        if (!wrapper) return;
+        agregarDesdeElemento(wrapper);
+    }
+
+    function agregarDesdeElemento(el) {
+        if (!el || !el.dataset) return;
+        const id = parseInt(el.dataset.id, 10);
+        const sku = el.dataset.sku || '';
+        const nombre = el.dataset.nombre || '';
+        const precio = parseFloat(el.dataset.precio) || 0;
+        const stock = parseInt(el.dataset.stock, 10) || 0;
+        agregarAlCarrito(id, sku, nombre, precio, stock);
+    }
+
+    // Agregar producto al carrito
+    function agregarAlCarrito(id, sku, nombre, precio, stock) {
+        if (!id) return;
+        if (stock <= 0) {
+            mostrarAlerta('El producto "' + nombre + '" se encuentra agotado en inventario.', 'warning');
+            return;
+        }
+
+        const index = carrito.findIndex(item => item.id === id);
+        if (index >= 0) {
+            if (carrito[index].cantidad + 1 > stock) {
+                mostrarAlerta('No puedes agregar más unidades de "' + nombre + '". Stock máximo disponible: ' + stock, 'warning');
+                return;
+            }
+            carrito[index].cantidad += 1;
+            carrito[index].subtotal = carrito[index].cantidad * carrito[index].precio;
+        } else {
+            carrito.push({
+                id: id,
+                sku: sku,
+                nombre: nombre,
+                precio: precio,
+                stock: stock,
+                cantidad: 1,
+                subtotal: precio
+            });
+        }
+
+        renderizarCarrito();
+    }
+
+    // Modificar cantidad
+    function cambiarCantidad(id, delta) {
+        const item = carrito.find(i => i.id === id);
+        if (!item) return;
+
+        const nuevaCant = item.cantidad + delta;
+        if (nuevaCant <= 0) {
+            eliminarDelCarrito(id);
+            return;
+        }
+
+        if (nuevaCant > item.stock) {
+            mostrarAlerta('Stock físico insuficiente para "' + item.nombre + '". Máximo: ' + item.stock, 'warning');
+            return;
+        }
+
+        item.cantidad = nuevaCant;
+        item.subtotal = item.cantidad * item.precio;
+        renderizarCarrito();
+    }
+
+    // Quitar producto
+    function eliminarDelCarrito(id) {
+        carrito = carrito.filter(i => i.id !== id);
+        renderizarCarrito();
+    }
+
+    // Vaciar carrito
+    function vaciarCarrito() {
+        if (carrito.length === 0) return;
+        if (confirm('¿Deseas vaciar el carrito actual?')) {
+            carrito = [];
+            renderizarCarrito();
+        }
+    }
+
+    // Renderizar tabla del carrito y totales
+    function renderizarCarrito() {
+        if (!carritoTbody) return;
+
+        if (carrito.length === 0) {
+            carritoTbody.innerHTML = `
+                <tr id="carritoVacioRow">
+                    <td colspan="5" class="text-center py-5 text-muted small">
+                        <i class="bi bi-cart-x fs-2 d-block mb-1 text-secondary opacity-50"></i>
+                        El carrito está vacío.<br>Selecciona o presiona "Agregar" a la izquierda.
+                    </td>
+                </tr>
+            `;
+            if (totalPagarDisplay) totalPagarDisplay.textContent = '$0.00';
+            if (cantArticulosBadge) cantArticulosBadge.textContent = '0';
+            if (btnCobrar) btnCobrar.disabled = true;
+            calcularCambio();
+            return;
+        }
+
+        let html = '';
+        let total = 0;
+        let totalArticulos = 0;
+
+        carrito.forEach(item => {
+            total += item.subtotal;
+            totalArticulos += item.cantidad;
+
+            html += `
+                <tr>
+                    <td class="ps-3">
+                        <div class="fw-semibold text-dark text-truncate" style="max-width: 140px;" title="${item.nombre}">${item.nombre}</div>
+                        <small class="text-muted" style="font-size: 0.75rem;">${item.sku}</small>
+                    </td>
+                    <td class="text-center">
+                        <div class="input-group input-group-sm d-inline-flex justify-content-center" style="width: 90px;">
+                            <button class="btn btn-outline-secondary px-1 py-0" type="button" onclick="cambiarCantidad(${item.id}, -1)">-</button>
+                            <input type="text" class="form-control text-center p-0 fw-bold bg-white" value="${item.cantidad}" readonly style="max-width: 34px;">
+                            <button class="btn btn-outline-secondary px-1 py-0" type="button" onclick="cambiarCantidad(${item.id}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td class="text-end small fw-semibold text-secondary">$${item.precio.toFixed(2)}</td>
+                    <td class="text-end fw-bold text-dark small">$${item.subtotal.toFixed(2)}</td>
+                    <td class="text-center pe-3">
+                        <button class="btn btn-link text-danger p-0 border-0" onclick="eliminarDelCarrito(${item.id})" title="Quitar">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        carritoTbody.innerHTML = html;
+        if (totalPagarDisplay) totalPagarDisplay.textContent = '$' + total.toFixed(2);
+        if (cantArticulosBadge) cantArticulosBadge.textContent = totalArticulos.toString();
+        if (btnCobrar) btnCobrar.disabled = false;
+
+        calcularCambio();
+    }
+
+    function calcularCambio() {
+        if (!montoRecibidoInput || !cambioDisplay) return;
+        const total = carrito.reduce((acc, item) => acc + item.subtotal, 0);
+        const montoRecibido = parseFloat(montoRecibidoInput.value) || 0;
+
+        if (montoRecibido > 0) {
+            const cambio = montoRecibido - total;
+            if (cambio >= 0) {
+                cambioDisplay.textContent = '$' + cambio.toFixed(2);
+                cambioDisplay.className = 'form-control form-control-sm bg-white fw-bold text-success border';
+            } else {
+                cambioDisplay.textContent = 'Faltan $' + Math.abs(cambio).toFixed(2);
+                cambioDisplay.className = 'form-control form-control-sm bg-white fw-bold text-danger border';
+            }
+        } else {
+            cambioDisplay.textContent = '$0.00';
+            cambioDisplay.className = 'form-control form-control-sm bg-white fw-bold text-secondary border';
+        }
+    }
+
+    // Procesar Cobro con llamada AJAX segura (Método único: EFECTIVO)
+    async function procesarCobro() {
+        if (carrito.length === 0) {
+            mostrarAlerta('El carrito está vacío. Agrega productos antes de cobrar.', 'warning');
+            return;
+        }
+
+        const total = carrito.reduce((acc, item) => acc + item.subtotal, 0);
+        const metodo = 'EFECTIVO';
+        const clienteId = selectCliente ? (parseInt(selectCliente.value, 10) || null) : null;
+
+        const recibido = montoRecibidoInput ? (parseFloat(montoRecibidoInput.value) || 0) : total;
+        if (recibido > 0 && recibido < total) {
+            mostrarAlerta('El monto recibido ($' + recibido.toFixed(2) + ') es menor al total a pagar ($' + total.toFixed(2) + ').', 'danger');
+            if (montoRecibidoInput) montoRecibidoInput.focus();
+            return;
+        }
+
+        // Construir payload DTO
+        const payload = {
+            clienteId: clienteId,
+            metodoPago: metodo,
+            items: carrito.map(i => ({ productoId: i.id, cantidad: i.cantidad })),
+            montoRecibido: recibido || total,
+            cambio: (recibido || total) - total
+        };
+
+        if (btnCobrar) {
+            btnCobrar.disabled = true;
+            btnCobrar.innerHTML = '<span class=\"spinner-border spinner-border-sm me-2\" role=\"status\" aria-hidden=\"true\"></span> Procesando venta...';
+        }
+
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (csrfToken) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            const response = await fetch('/caja/procesar', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Redirigir directamente al comprobante / ticket
+                window.location.href = data.redirectUrl;
+            } else {
+                mostrarAlerta(data.mensaje || 'Error al procesar la venta.', 'danger');
+                if (btnCobrar) {
+                    btnCobrar.disabled = false;
+                    btnCobrar.innerHTML = '<i class=\"bi bi-check-circle-fill fs-5 text-white\"></i> <span class=\"text-white\">COBRAR Y EMITIR TICKET</span>';
+                }
+            }
+        } catch (err) {
+            mostrarAlerta('Ocurrió un error de red o comunicación: ' + err.message, 'danger');
+            if (btnCobrar) {
+                btnCobrar.disabled = false;
+                btnCobrar.innerHTML = '<i class=\"bi bi-check-circle-fill fs-5 text-white\"></i> <span class=\"text-white\">COBRAR Y EMITIR TICKET</span>';
+            }
+        }
+    }
+
+    function mostrarAlerta(mensaje, tipo) {
+        const container = document.getElementById('cajaAlertContainer');
+        if (!container) return;
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show rounded-3 mb-3 shadow-sm`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <i class="bi bi-${tipo === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>
+            <span>${mensaje}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        `;
+        container.appendChild(alertDiv);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

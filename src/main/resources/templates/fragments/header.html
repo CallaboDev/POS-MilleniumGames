@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#111827">
-    <title th:text="${titulo} != null ? ${titulo} + ' | Millenium Games POS' : 'Millenium Games POS'">Millenium Games
-        POS</title>
+    <title th:text="${titulo} != null ? ${titulo} + ' | Millenium Games POS' : 'Millenium Games POS'">Millenium Games POS</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,13 +20,19 @@
     <!-- Estilos personalizados para el panel administrativo con sidebar colapsable -->
     <link rel="stylesheet" th:href="@{/css/layout.css}">
 
-    <!-- Script Modo Oscuro/Claro (Ejecución temprana) -->
+    <!-- Script Modo Oscuro/Claro (Ejecución temprana para evitar parpadeo) -->
     <script>
         (function() {
-            var theme = localStorage.getItem("theme");
-            if (theme === "dark") {
-                document.documentElement.setAttribute("data-theme", "dark");
-            }
+            try {
+                var theme = localStorage.getItem("theme");
+                if (theme === "dark") {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                    document.documentElement.setAttribute("data-bs-theme", "dark");
+                } else {
+                    document.documentElement.setAttribute("data-theme", "light");
+                    document.documentElement.setAttribute("data-bs-theme", "light");
+                }
+            } catch (e) {}
         })();
     </script>
 </head>
