@@ -37,7 +37,7 @@ public class ClienteServiceImpl implements ClienteService {
                     Cliente consumidorFinal = new Cliente();
                     consumidorFinal.setNombreCompleto("Consumidor Final");
                     consumidorFinal.setTelefono("N/A");
-                    consumidorFinal.setCorreo("consumidorfinal@milleniumgames.com");
+                    consumidorFinal.setCorreo("nose@gmail.com");
                     return clienteRepository.save(consumidorFinal);
                 });
     }
@@ -45,10 +45,43 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public Cliente guardar(Cliente cliente) {
-        if (cliente.getNombreCompleto() == null || cliente.getNombreCompleto().isBlank()) {
-            throw new IllegalArgumentException("El nombre del cliente es obligatorio.");
-        }
+        validar(cliente);
+        cliente.setNombreCompleto(cliente.getNombreCompleto().trim());
         return clienteRepository.save(cliente);
+    }
+
+    @Override
+    @Transactional
+    public Cliente actualizar(Long id, Cliente cliente) {
+        Cliente existente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el cliente."));
+        validar(cliente);
+        existente.setNombreCompleto(cliente.getNombreCompleto().trim());
+        existente.setCorreo(limpiar(cliente.getCorreo()));
+        existente.setTelefono(limpiar(cliente.getTelefono()));
+        return clienteRepository.save(existente);
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        if (!clienteRepository.existsById(id)) {
+            throw new IllegalArgumentException("No se encontró el cliente.");
+        }
+        clienteRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Cliente> listar(String criterio) {
+        if (criterio == null || criterio.isBlank()) return obtenerTodos();
+        String termino = criterio.trim();
+        java.util.LinkedHashMap<Long, Cliente> resultados = new java.util.LinkedHashMap<>();
+        clienteRepository.findByNombreCompletoContainingIgnoreCase(termino)
+                .forEach(c -> resultados.put(c.getId(), c));
+        clienteRepository.findByCorreoContainingIgnoreCase(termino)
+                .forEach(c -> resultados.put(c.getId(), c));
+        return List.copyOf(resultados.values());
     }
 
     @Override
@@ -58,5 +91,17 @@ public class ClienteServiceImpl implements ClienteService {
             return obtenerTodos();
         }
         return clienteRepository.findByNombreCompletoContainingIgnoreCase(nombre.trim());
+    }
+
+    private void validar(Cliente cliente) {
+        if (cliente.getNombreCompleto() == null || cliente.getNombreCompleto().isBlank()) {
+            throw new IllegalArgumentException("El nombre del cliente es obligatorio.");
+        }
+        cliente.setCorreo(limpiar(cliente.getCorreo()));
+        cliente.setTelefono(limpiar(cliente.getTelefono()));
+    }
+
+    private String limpiar(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
     }
 }

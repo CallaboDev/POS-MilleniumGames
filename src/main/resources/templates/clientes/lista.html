@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Clientes')}"><title>Clientes</title></head>
+<body>
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div><div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="main-wrapper" id="mainWrapper">
+        <header th:replace="~{fragments/navbar :: navbar}"></header>
+        <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+            <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert"><span th:text="${exito}"></span><button class="btn-close" data-bs-dismiss="alert"></button></div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert"><span th:text="${error}"></span><button class="btn-close" data-bs-dismiss="alert"></button></div>
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div><h1 class="h3 fw-bold">Clientes</h1><p class="text-secondary mb-0">Compradores registrados</p></div>
+                <a th:href="@{/clientes/nuevo}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo cliente</a>
+            </div>
+            <form th:action="@{/clientes}" method="get" class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body row g-2">
+                <div class="col-md-8"><input class="form-control" type="search" name="buscar" th:value="${buscar}" placeholder="Buscar por nombre o correo"></div>
+                <div class="col-md-4 d-flex gap-2"><button class="btn btn-secondary" type="submit">Buscar</button><a th:href="@{/clientes}" class="btn btn-outline-secondary">Limpiar</a></div>
+            </div></form>
+            <div class="card border-0 shadow-sm rounded-4"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th class="ps-4">Nombre completo</th><th>Correo</th><th>Teléfono</th><th class="text-end pe-4">Acciones</th></tr></thead>
+                <tbody><tr th:each="cliente : ${clientes}"><td class="ps-4 fw-semibold" th:text="${cliente.nombreCompleto}"></td><td th:text="${cliente.correo ?: '—'}"></td><td th:text="${cliente.telefono ?: '—'}"></td>
+                    <td class="text-end pe-4"><a class="btn btn-sm btn-outline-primary" th:href="@{/clientes/editar/{id}(id=${cliente.id})}">Editar</a>
+                        <form class="d-inline" method="post" th:action="@{/clientes/eliminar/{id}(id=${cliente.id})}" onsubmit="return confirm('¿Eliminar este cliente?')"><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
+                    <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="4" class="text-center text-secondary py-4">No hay clientes que coincidan con la búsqueda.</td></tr>
+                </tbody></table></div></div>
+        </main><footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body></html>
