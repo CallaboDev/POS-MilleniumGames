@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Datos del cliente')}"><title>Cliente</title></head>
+<body>
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div><div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="main-wrapper" id="mainWrapper"><header th:replace="~{fragments/navbar :: navbar}"></header>
+        <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            <h1 class="h3 fw-bold mb-4" th:text="${modoEdicion ? 'Modificar cliente' : 'Registrar cliente'}"></h1>
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+                <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+                    <input type="hidden" th:field="*{id}">
+                    <div class="mb-3"><label class="form-label fw-semibold" for="nombreCompleto">Nombre completo <span class="text-danger">*</span></label><input id="nombreCompleto" class="form-control" th:field="*{nombreCompleto}" maxlength="180" required autofocus></div>
+                    <div class="mb-3"><label class="form-label fw-semibold" for="correo">Correo electrónico</label><input id="correo" class="form-control" type="email" th:field="*{correo}" maxlength="180" placeholder="cliente@correo.com"></div>
+                    <div class="mb-4"><label class="form-label fw-semibold" for="telefono">Teléfono</label><input id="telefono" class="form-control" type="tel" th:field="*{telefono}" maxlength="40" placeholder="7890-1234"></div>
+                    <div class="d-flex justify-content-end gap-2"><a th:href="@{/clientes}" class="btn btn-light border">Cancelar</a><button class="btn btn-primary" type="submit">Guardar cliente</button></div>
+                </form>
+            </div></div>
+        </main><footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body></html>

@@ -10,5 +10,8 @@ public interface ClienteService {
     Optional<Cliente> buscarPorId(Long id);
     Cliente obtenerOCrearConsumidorFinal();
     Cliente guardar(Cliente cliente);
+    Cliente actualizar(Long id, Cliente cliente);
+    void eliminar(Long id);
+    List<Cliente> listar(String criterio);
     List<Cliente> buscarPorNombre(String nombre);
 }
