@@ -46,7 +46,7 @@
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold"
                                       style="letter-spacing: 0.5px;">Videojuegos</span>
-                                <h2 class="h3 fw-bold text-dark mb-0 mt-1">0</h2>
+                                <h2 class="h3 fw-bold text-dark mb-0 mt-1" th:text="${totalVideojuegos}">0</h2>
                             </div>
                             <div class="metric-icon-box bg-primary-subtle text-primary">
                                 <i class="bi bi-controller"></i>
@@ -68,7 +68,7 @@
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold"
                                       style="letter-spacing: 0.5px;">Clientes</span>
-                                <h2 class="h3 fw-bold text-dark mb-0 mt-1">0</h2>
+                                <h2 class="h3 fw-bold text-dark mb-0 mt-1" th:text="${totalClientes}">0</h2>
                             </div>
                             <div class="metric-icon-box bg-info-subtle text-info">
                                 <i class="bi bi-people-fill"></i>
@@ -91,7 +91,8 @@
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold"
                                       style="letter-spacing: 0.5px;">Ventas del Día</span>
-                                <h2 class="h3 fw-bold text-dark mb-0 mt-1">$0.00</h2>
+                                <h2 class="h3 fw-bold text-dark mb-0 mt-1"
+                                    th:text="|${#numbers.formatDecimal(ventasHoy, 1, 2)}|">$0.00</h2>
                             </div>
                             <div class="metric-icon-box bg-warning-subtle text-warning-emphasis">
                                 <i class="bi bi-cart-check"></i>
@@ -114,7 +115,7 @@
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold"
                                       style="letter-spacing: 0.5px;">Personal</span>
-                                <h2 class="h3 fw-bold text-dark mb-0 mt-1">0</h2>
+                                <h2 class="h3 fw-bold text-dark mb-0 mt-1" th:text="${totalPersonal}">0</h2>
                             </div>
                             <div class="metric-icon-box bg-success-subtle text-success">
                                 <i class="bi bi-person-badge"></i>
