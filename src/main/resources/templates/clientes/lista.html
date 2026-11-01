@@ -21,7 +21,7 @@
                 <thead class="table-light"><tr><th class="ps-4">Nombre completo</th><th>Correo</th><th>Teléfono</th><th class="text-end pe-4">Acciones</th></tr></thead>
                 <tbody><tr th:each="cliente : ${clientes}"><td class="ps-4 fw-semibold" th:text="${cliente.nombreCompleto}"></td><td th:text="${cliente.correo ?: '—'}"></td><td th:text="${cliente.telefono ?: '—'}"></td>
                     <td class="text-end pe-4"><a class="btn btn-sm btn-outline-primary" th:href="@{/clientes/editar/{id}(id=${cliente.id})}">Editar</a>
-                        <form class="d-inline" method="post" th:action="@{/clientes/eliminar/{id}(id=${cliente.id})}" onsubmit="return confirm('¿Eliminar este cliente?')"><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
+                        <form class="d-inline" method="post" th:action="@{/clientes/eliminar/{id}(id=${cliente.id})}" data-confirm-delete data-confirm-message="¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer."><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
                     <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="4" class="text-center text-secondary py-4">No hay clientes que coincidan con la búsqueda.</td></tr>
                 </tbody></table></div></div>
         </main><footer th:replace="~{fragments/footer :: footer}"></footer>
