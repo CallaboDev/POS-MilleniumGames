@@ -65,8 +65,8 @@
                                     <span class="d-none d-md-inline">Editar</span>
                                 </a>
                                 <form th:unless="${usuario.id == usuarioActualId}" th:action="@{/usuarios/eliminar/{id}(id=${usuario.id})}"
-                                      method="post" class="d-inline"
-                                      onsubmit="return confirm('¿Seguro que deseas eliminar esta cuenta? Esta acción no se puede deshacer.');">
+                                      method="post" class="d-inline" data-confirm-delete
+                                      data-confirm-message="¿Estás seguro de que deseas eliminar esta cuenta de usuario? Esta acción no se puede deshacer.">
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 ms-1" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                         <span class="d-none d-md-inline">Eliminar</span>
