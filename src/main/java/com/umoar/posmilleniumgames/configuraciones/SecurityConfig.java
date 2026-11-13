@@ -22,9 +22,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**")
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**").permitAll()
                         .requestMatchers("/login", "/logout").permitAll()
+                        .requestMatchers("/docs", "/docs/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers(
                                 "/reportes/**",
                                 "/usuarios/**",
