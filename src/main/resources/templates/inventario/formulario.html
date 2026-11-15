@@ -253,13 +253,17 @@
 
         if (file) {
             if (!validTypes.includes(file.type)) {
-                alert('Solo se permiten archivos de imagen (JPG, PNG, WEBP).');
+                e.target.setCustomValidity('Solo se permiten archivos de imagen (JPG, PNG, WEBP).');
+                e.target.reportValidity();
+                e.target.setCustomValidity('');
                 e.target.value = '';
                 return;
             }
 
             if (file.size > maxSize) {
-                alert('El archivo no debe exceder 3MB.');
+                e.target.setCustomValidity('El archivo no debe exceder 3MB.');
+                e.target.reportValidity();
+                e.target.setCustomValidity('');
                 e.target.value = '';
             }
         }
@@ -272,13 +276,19 @@
 
         if (precio < 0) {
             e.preventDefault();
-            alert('El precio no puede ser negativo.');
+            const campoPrecio = document.getElementById('precio');
+            campoPrecio.setCustomValidity('El precio no puede ser negativo.');
+            campoPrecio.reportValidity();
+            campoPrecio.setCustomValidity('');
             return false;
         }
 
         if (stock < 0) {
             e.preventDefault();
-            alert('El stock no puede ser inferior a cero.');
+            const campoStock = document.getElementById('stock');
+            campoStock.setCustomValidity('El stock no puede ser inferior a cero.');
+            campoStock.reportValidity();
+            campoStock.setCustomValidity('');
             return false;
         }
     });

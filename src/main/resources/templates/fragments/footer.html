@@ -4,6 +4,24 @@
 
 <!-- Pie de Página y Scripts -->
 <footer th:fragment="footer" class="mt-auto py-3 px-4 bg-white border-top">
+    <div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-labelledby="globalConfirmTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content global-confirm-modal">
+                <div class="modal-body text-center p-4 p-md-5">
+                    <div class="global-confirm-icon mx-auto mb-3" aria-hidden="true"><i class="bi bi-exclamation-lg"></i></div>
+                    <h2 class="h4 fw-bold mb-2" id="globalConfirmTitle">¿Confirmar eliminación?</h2>
+                    <p class="text-secondary mb-4" id="globalConfirmMessage">¿Estás seguro de que deseas continuar?</p>
+                    <div class="d-flex flex-column-reverse flex-sm-row justify-content-center gap-2">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" id="globalConfirmCancel">Cancelar</button>
+                        <button type="button" class="btn btn-danger px-4" id="globalConfirmAccept">
+                            <span class="confirm-button-label">Eliminar</span>
+                            <span class="confirm-button-loading d-none"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Procesando...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 text-muted small">
         <div class="d-flex align-items-center gap-2">
             <span class="fw-semibold text-dark">🎮 Millenium Games POS</span>
@@ -18,6 +36,7 @@
     
     <!-- Script global de Tema -->
     <script th:src="@{/js/theme-toggle.js}"></script>
+    <script th:src="@{/js/confirm-modal.js}"></script>
 </footer>
 </body>
 </html>

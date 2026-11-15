@@ -161,39 +161,12 @@
                                        class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#modalEliminar' + ${producto.id}">
+                                    <a th:href="@{'/productos/eliminar/' + ${producto.id}}"
+                                       class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                       data-confirm-delete
+                                       th:data-confirm-message="|¿Estás seguro de que deseas eliminar el producto ${producto.nombre}? Esta acción no se puede deshacer.|">
                                         <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    <!-- Modal de Confirmación de Eliminación -->
-                                    <div class="modal fade" th:id="'modalEliminar' + ${producto.id}" tabindex="-1"
-                                         aria-labelledby="modalEliminarLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-danger text-white">
-                                                    <h5 class="modal-title" id="modalEliminarLabel">Confirmar
-                                                        Eliminación</h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                            data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <p class="mb-0">¿Está seguro de que desea eliminar el producto
-                                                        <strong th:text="${producto.nombre}"></strong>?</p>
-                                                    <p class="text-muted small mt-2">Esta acción no se puede
-                                                        deshacer.</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Cancelar
-                                                    </button>
-                                                    <a th:href="@{'/productos/eliminar/' + ${producto.id}}"
-                                                       class="btn btn-danger">Eliminar</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </a>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(productos)}">
