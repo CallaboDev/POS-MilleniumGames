@@ -1,8 +1,5 @@
 package com.umoar.posmilleniumgames.modulos.ventas.controladores;
 
-import com.umoar.posmilleniumgames.modulos.inventario.repositorios.ProductoRepository;
-import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
-import com.umoar.posmilleniumgames.modulos.ventas.repositorios.ClienteRepository;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.ReporteService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -15,27 +12,18 @@ import java.time.LocalDate;
 @Controller
 public class HomeController {
     private final ReporteService reporteService;
-    private final ProductoRepository productoRepository;
-    private final ClienteRepository clienteRepository;
-    private final UsuarioRepository usuarioRepository;
 
-    public HomeController(ReporteService reporteService,
-                          ProductoRepository productoRepository,
-                          ClienteRepository clienteRepository,
-                          UsuarioRepository usuarioRepository) {
+    public HomeController(ReporteService reporteService) {
         this.reporteService = reporteService;
-        this.productoRepository = productoRepository;
-        this.clienteRepository = clienteRepository;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping("/")
     public String index(Model model) {
         LocalDate hoy = LocalDate.now();
-        model.addAttribute("totalVideojuegos", productoRepository.count());
-        model.addAttribute("totalClientes", clienteRepository.count());
+        model.addAttribute("totalVideojuegos", reporteService.totalVideojuegos());
+        model.addAttribute("totalClientes", reporteService.totalClientes());
         model.addAttribute("ventasHoy", reporteService.ingresosDelDia(hoy));
-        model.addAttribute("totalPersonal", usuarioRepository.count());
+        model.addAttribute("totalPersonal", reporteService.totalPersonal());
         return "dashboard/index";
     }
 

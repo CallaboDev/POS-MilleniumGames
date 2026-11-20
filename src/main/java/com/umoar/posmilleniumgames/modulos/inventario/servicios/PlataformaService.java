@@ -1,55 +1,17 @@
 package com.umoar.posmilleniumgames.modulos.inventario.servicios;
 
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Plataforma;
-import com.umoar.posmilleniumgames.modulos.inventario.repositorios.PlataformaRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class PlataformaService {
+public interface PlataformaService {
 
-    private final PlataformaRepository plataformaRepository;
+    List<Plataforma> obtenerTodas();
 
-    public PlataformaService(PlataformaRepository plataformaRepository) {
-        this.plataformaRepository = plataformaRepository;
-    }
+    Optional<Plataforma> buscarPorId(Long id);
 
-    @Transactional(readOnly = true)
-    public List<Plataforma> obtenerTodas() {
-        return plataformaRepository.findAll();
-    }
+    Plataforma guardar(Plataforma plataforma);
 
-    @Transactional(readOnly = true)
-    public Optional<Plataforma> buscarPorId(Long id) {
-        return plataformaRepository.findById(id);
-    }
-
-    @Transactional
-    public Plataforma guardar(Plataforma plataforma) {
-        if (plataforma.getNombre() == null || plataforma.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la plataforma es obligatorio.");
-        }
-        plataforma.setNombre(plataforma.getNombre().trim());
-        if (plataformaRepository.existsByNombreIgnoreCase(plataforma.getNombre())) {
-            throw new IllegalArgumentException("Ya existe una plataforma con el nombre: " + plataforma.getNombre());
-        }
-        return plataformaRepository.save(plataforma);
-    }
-
-    @Transactional
-    public Plataforma crearSiNoExiste(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
-            return null;
-        }
-        String nombreLimpio = nombre.trim();
-        return plataformaRepository.findByNombreIgnoreCase(nombreLimpio)
-                .orElseGet(() -> {
-                    Plataforma nueva = new Plataforma();
-                    nueva.setNombre(nombreLimpio);
-                    return plataformaRepository.save(nueva);
-                });
-    }
+    Plataforma crearSiNoExiste(String nombre);
 }

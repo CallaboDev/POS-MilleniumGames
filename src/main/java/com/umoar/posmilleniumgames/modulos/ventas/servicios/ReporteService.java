@@ -27,4 +27,10 @@ public interface ReporteService {
     List<Producto> productosConStockCritico();
 
     List<Object[]> productosMasVendidos();
+ 
+    long totalVideojuegos();
+ 
+    long totalClientes();
+ 
+    long totalPersonal();
 }

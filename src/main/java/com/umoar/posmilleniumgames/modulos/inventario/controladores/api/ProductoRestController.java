@@ -1,12 +1,11 @@
 package com.umoar.posmilleniumgames.modulos.inventario.controladores.api;
 
+import com.umoar.posmilleniumgames.modulos.comun.servicios.FileStorageService;
 import com.umoar.posmilleniumgames.modulos.inventario.dto.ProductoRequestDTO;
 import com.umoar.posmilleniumgames.modulos.inventario.dto.ProductoResponseDTO;
-import com.umoar.posmilleniumgames.modulos.inventario.modelos.Categoria;
-import com.umoar.posmilleniumgames.modulos.inventario.modelos.Plataforma;
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
-import com.umoar.posmilleniumgames.modulos.inventario.repositorios.CategoriaRepository;
-import com.umoar.posmilleniumgames.modulos.inventario.repositorios.PlataformaRepository;
+import com.umoar.posmilleniumgames.modulos.inventario.servicios.CategoriaService;
+import com.umoar.posmilleniumgames.modulos.inventario.servicios.PlataformaService;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +17,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,15 +34,18 @@ import java.util.List;
 public class ProductoRestController {
 
     private final ProductoService productoService;
-    private final CategoriaRepository categoriaRepository;
-    private final PlataformaRepository plataformaRepository;
+    private final CategoriaService categoriaService;
+    private final PlataformaService plataformaService;
+    private final FileStorageService fileStorageService;
 
     public ProductoRestController(ProductoService productoService,
-                                  CategoriaRepository categoriaRepository,
-                                  PlataformaRepository plataformaRepository) {
+                                  CategoriaService categoriaService,
+                                  PlataformaService plataformaService,
+                                  FileStorageService fileStorageService) {
         this.productoService = productoService;
-        this.categoriaRepository = categoriaRepository;
-        this.plataformaRepository = plataformaRepository;
+        this.categoriaService = categoriaService;
+        this.plataformaService = plataformaService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping
@@ -158,10 +167,10 @@ public class ProductoRestController {
         producto.setStock(dto.getStock() != null ? dto.getStock() : 0);
 
         if (dto.getCategoriaId() != null) {
-            categoriaRepository.findById(dto.getCategoriaId()).ifPresent(producto::setCategoria);
+            categoriaService.buscarPorId(dto.getCategoriaId()).ifPresent(producto::setCategoria);
         }
         if (dto.getPlataformaId() != null) {
-            plataformaRepository.findById(dto.getPlataformaId()).ifPresent(producto::setPlataforma);
+            plataformaService.buscarPorId(dto.getPlataformaId()).ifPresent(producto::setPlataforma);
         }
 
         try {
@@ -185,8 +194,12 @@ public class ProductoRestController {
             @Parameter(description = "ID del producto a eliminar", example = "1", required = true)
             @PathVariable Long id) {
         try {
-            productoService.obtenerPorId(id);
+            Producto producto = productoService.obtenerPorId(id);
+            String imagen = producto.getImagen();
             productoService.eliminar(id);
+            if (imagen != null) {
+                fileStorageService.eliminarArchivo(imagen);
+            }
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

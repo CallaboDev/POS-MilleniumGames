@@ -2,8 +2,7 @@ package com.umoar.posmilleniumgames.modulos.ventas.controladores;
 
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.ProductoService;
-import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
-import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
+import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioService;
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Cliente;
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.ClienteService;
@@ -28,7 +27,7 @@ class VentaControllerTest {
     private VentaService ventaService;
     private ProductoService productoService;
     private ClienteService clienteService;
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -36,9 +35,9 @@ class VentaControllerTest {
         ventaService = Mockito.mock(VentaService.class);
         productoService = Mockito.mock(ProductoService.class);
         clienteService = Mockito.mock(ClienteService.class);
-        usuarioRepository = Mockito.mock(UsuarioRepository.class);
+        usuarioService = Mockito.mock(UsuarioService.class);
 
-        VentaController controller = new VentaController(ventaService, productoService, clienteService, usuarioRepository);
+        VentaController controller = new VentaController(ventaService, productoService, clienteService, usuarioService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
