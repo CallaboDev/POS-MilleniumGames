@@ -1,8 +1,10 @@
 package com.umoar.posmilleniumgames.modulos.ventas.servicios;
 
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
-import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
 import com.umoar.posmilleniumgames.modulos.inventario.repositorios.ProductoRepository;
+import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
+import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
+import com.umoar.posmilleniumgames.modulos.ventas.repositorios.ClienteRepository;
 import com.umoar.posmilleniumgames.modulos.ventas.repositorios.VentaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +20,17 @@ public class ReporteServiceImpl implements ReporteService {
 
     private final VentaRepository ventaRepository;
     private final ProductoRepository productoRepository;
+    private final ClienteRepository clienteRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public ReporteServiceImpl(VentaRepository ventaRepository, ProductoRepository productoRepository) {
+    public ReporteServiceImpl(VentaRepository ventaRepository,
+                              ProductoRepository productoRepository,
+                              ClienteRepository clienteRepository,
+                              UsuarioRepository usuarioRepository) {
         this.ventaRepository = ventaRepository;
         this.productoRepository = productoRepository;
+        this.clienteRepository = clienteRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -75,6 +84,21 @@ public class ReporteServiceImpl implements ReporteService {
     @Override
     public List<Object[]> productosMasVendidos() {
         return ventaRepository.buscarProductosMasVendidos().stream().limit(5).toList();
+    }
+
+    @Override
+    public long totalVideojuegos() {
+        return productoRepository.count();
+    }
+
+    @Override
+    public long totalClientes() {
+        return clienteRepository.count();
+    }
+
+    @Override
+    public long totalPersonal() {
+        return usuarioRepository.count();
     }
 }
 

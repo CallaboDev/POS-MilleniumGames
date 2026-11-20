@@ -2,7 +2,6 @@ package com.umoar.posmilleniumgames.modulos.usuarios.controladores;
 
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Rol;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
-import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.RolRepository;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioDetalles;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioService;
 import org.springframework.security.core.Authentication;
@@ -20,12 +19,10 @@ import java.util.Optional;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioController(UsuarioService usuarioService, RolRepository rolRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioController(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
-        this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -63,7 +60,7 @@ public class UsuarioController {
         usuario.setPassword(passwordEncoder.encode(form.getPassword()));
         usuario.setEnabled(true);
 
-        Optional<Rol> rolOpt = rolRepository.findByNombre("ROLE_" + form.getRol().toUpperCase());
+        Optional<Rol> rolOpt = usuarioService.buscarRolPorNombre("ROLE_" + form.getRol().toUpperCase());
         rolOpt.ifPresent(rol -> usuario.getRoles().add(rol));
 
         usuarioService.guardar(usuario);
@@ -133,7 +130,7 @@ public class UsuarioController {
             usuarioActual.setPassword(passwordEncoder.encode(form.getPassword()));
         }
 
-        Optional<Rol> rolOpt = rolRepository.findByNombre("ROLE_" + form.getRol().toUpperCase());
+        Optional<Rol> rolOpt = usuarioService.buscarRolPorNombre("ROLE_" + form.getRol().toUpperCase());
         if (rolOpt.isPresent()) {
             usuarioActual.getRoles().clear();
             usuarioActual.getRoles().add(rolOpt.get());

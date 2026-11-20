@@ -3,8 +3,8 @@ package com.umoar.posmilleniumgames.modulos.ventas.controladores;
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.ProductoService;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
-import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioDetalles;
+import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioService;
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.ClienteService;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.RegistroVentaDTO;
@@ -28,16 +28,16 @@ public class VentaController {
     private final VentaService ventaService;
     private final ProductoService productoService;
     private final ClienteService clienteService;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
     public VentaController(VentaService ventaService,
                            ProductoService productoService,
                            ClienteService clienteService,
-                           UsuarioRepository usuarioRepository) {
+                           UsuarioService usuarioService) {
         this.ventaService = ventaService;
         this.productoService = productoService;
         this.clienteService = clienteService;
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
     }
 
     /**
@@ -157,7 +157,7 @@ public class VentaController {
             if (authentication.getPrincipal() instanceof UsuarioDetalles detalles) {
                 usuario = detalles.getUsuario();
             } else {
-                usuario = usuarioRepository.findByUsername(authentication.getName()).orElse(null);
+                usuario = usuarioService.buscarPorUsername(authentication.getName()).orElse(null);
             }
 
             if (usuario != null) {

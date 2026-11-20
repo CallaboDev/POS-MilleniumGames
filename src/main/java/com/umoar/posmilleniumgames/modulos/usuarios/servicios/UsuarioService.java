@@ -1,5 +1,6 @@
 package com.umoar.posmilleniumgames.modulos.usuarios.servicios;
 
+import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Rol;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface UsuarioService {
     Optional<Usuario> buscarPorUsername(String username);
 
     boolean existePorUsername(String username);
+
+    Optional<Rol> buscarRolPorNombre(String nombre);
 
     Usuario guardar(Usuario usuario);
 

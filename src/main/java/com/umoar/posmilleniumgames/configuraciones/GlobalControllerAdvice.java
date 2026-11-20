@@ -1,8 +1,8 @@
 package com.umoar.posmilleniumgames.configuraciones;
 
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
-import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioDetalles;
+import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
-    public GlobalControllerAdvice(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public GlobalControllerAdvice(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
     @ModelAttribute("nombreUsuarioLogueado")
@@ -24,7 +24,7 @@ public class GlobalControllerAdvice {
         if (authentication.getPrincipal() instanceof UsuarioDetalles detalles) {
             return detalles.getNombre();
         }
-        return usuarioRepository.findByUsername(authentication.getName())
+        return usuarioService.buscarPorUsername(authentication.getName())
                 .map(Usuario::getNombre)
                 .orElse(authentication.getName());
     }
