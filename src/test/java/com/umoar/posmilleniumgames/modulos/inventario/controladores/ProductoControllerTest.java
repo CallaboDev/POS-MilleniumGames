@@ -11,6 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -19,6 +24,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -58,13 +65,43 @@ class ProductoControllerTest {
     }
 
     @Test
-    void testListarProductosRetornaVistaLista() throws Exception {
-        when(productoService.obtenerTodos()).thenReturn(List.of());
+    void testListarProductosRetornaVistaListaPaginada() throws Exception {
+        when(productoService.obtenerPaginado(isNull(), any(Pageable.class)))
+                .thenReturn(Page.empty(PageRequest.of(0, ProductoController.CATALOGO_PAGE_SIZE)));
 
         mockMvc.perform(get("/productos"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("inventario/lista"))
-                .andExpect(model().attributeExists("productos"));
+                .andExpect(model().attributeExists("productos"))
+                .andExpect(model().attributeExists("productosPage"))
+                .andExpect(model().attributeDoesNotExist("buscar"));
+
+        verify(productoService).obtenerPaginado(
+                isNull(),
+                eq(PageRequest.of(0, 21, Sort.by(Sort.Direction.ASC, "id")))
+        );
+    }
+
+    @Test
+    void testListarProductosConPaginaYBusqueda() throws Exception {
+        Producto prod = new Producto();
+        prod.setId(22L);
+        prod.setSku("PERF-00022");
+        prod.setNombre("Zelda");
+        Page<Producto> pagina = new PageImpl<>(
+                List.of(prod),
+                PageRequest.of(1, 21, Sort.by(Sort.Direction.ASC, "id")),
+                42
+        );
+
+        when(productoService.obtenerPaginado(eq("Zelda"), eq(PageRequest.of(1, 21, Sort.by(Sort.Direction.ASC, "id")))))
+                .thenReturn(pagina);
+
+        mockMvc.perform(get("/productos").param("page", "1").param("buscar", "  Zelda  "))
+                .andExpect(status().isOk())
+                .andExpect(view().name("inventario/lista"))
+                .andExpect(model().attribute("buscar", "Zelda"))
+                .andExpect(model().attribute("productosPage", pagina));
     }
 
     @Test

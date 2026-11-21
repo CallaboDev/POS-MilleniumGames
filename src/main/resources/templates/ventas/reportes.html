@@ -48,7 +48,7 @@
                 <div class="col-12 col-md-6">
                     <div class="metric-card p-4 h-100 border-start border-4 border-primary">
                         <span class="text-secondary small text-uppercase fw-semibold">Ingresos del periodo</span>
-                        <div class="h2 fw-bold mb-0 mt-2" th:text="|$${#numbers.formatDecimal(ingresosPeriodo, 1, 2)}|">
+                        <div class="h2 fw-bold mb-0 mt-2" th:text="'$' + ${#numbers.formatDecimal(ingresosPeriodo, 1, 2)}">
                             $0.00
                         </div>
                     </div>
@@ -90,14 +90,14 @@
                             <ul class="list-unstyled small mb-0" th:if="${!#lists.isEmpty(venta.detalles)}">
                                 <li th:each="detalle : ${venta.detalles}" class="mb-1">
                                     <span class="fw-semibold" th:text="${detalle.producto.nombre}">Producto</span>
-                                    <span th:text="| · ${detalle.cantidad} x $${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)} = $${#numbers.formatDecimal(detalle.subtotal, 1, 2)}|"></span>
+                                    <span th:text="' · ' + ${detalle.cantidad} + ' x $' + ${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)} + ' = $' + ${#numbers.formatDecimal(detalle.subtotal, 1, 2)}"></span>
                                 </li>
                             </ul>
                             <span class="text-secondary small"
                                   th:if="${#lists.isEmpty(venta.detalles)}">Sin detalle</span>
                             </td>
                             <td th:text="${venta.metodoPago}">EFECTIVO</td>
-                            <td class="text-end fw-semibold" th:text="|$${#numbers.formatDecimal(venta.total, 1, 2)}|">
+                            <td class="text-end fw-semibold" th:text="'$' + ${#numbers.formatDecimal(venta.total, 1, 2)}">
                                 $0.00
                             </td>
                         </tr>
@@ -111,12 +111,14 @@
                 </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4" id="seccionTablasSecundarias">
                 <div class="col-12 col-lg-6">
-                    <section class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-header bg-white p-3 p-md-4"><h2 class="h5 fw-bold mb-0"><i
-                                class="bi bi-trophy me-2 text-warning"></i>Productos más vendidos</h2></div>
-                        <div class="table-responsive">
+                    <section class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column">
+                        <div class="card-header bg-white p-3 p-md-4 d-flex justify-content-between align-items-center">
+                            <h2 class="h5 fw-bold mb-0"><i class="bi bi-trophy me-2 text-warning"></i>Productos más vendidos</h2>
+                            <span id="masVendidosSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-hidden="true"></span>
+                        </div>
+                        <div class="table-responsive flex-grow-1">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                 <tr>
@@ -125,11 +127,11 @@
                                     <th class="text-end">Ingresos</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tbodyMasVendidos">
                                 <tr th:each="producto : ${productosMasVendidos}">
                                     <td th:text="${producto[0]}">Videojuego</td>
                                     <td class="text-end" th:text="${producto[1]}">0</td>
-                                    <td class="text-end" th:text="|$${#numbers.formatDecimal(producto[2], 1, 2)}|">
+                                    <td class="text-end" th:text="'$' + ${#numbers.formatDecimal(producto[2], 1, 2)}">
                                         $0.00
                                     </td>
                                 </tr>
@@ -141,14 +143,23 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Paginación Productos más vendidos (15 por página) -->
+                        <div class="card-footer bg-light border-top px-3 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                            <small class="text-secondary fw-medium" id="infoMasVendidos"></small>
+                            <nav aria-label="Paginación de productos más vendidos">
+                                <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center" id="paginacionMasVendidos"></ul>
+                            </nav>
+                        </div>
                     </section>
                 </div>
+
                 <div class="col-12 col-lg-6">
-                    <section class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-header bg-white p-3 p-md-4"><h2 class="h5 fw-bold mb-0"><i
-                                class="bi bi-exclamation-triangle me-2 text-danger"></i>Stock crítico (3 o menos)</h2>
+                    <section class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column">
+                        <div class="card-header bg-white p-3 p-md-4 d-flex justify-content-between align-items-center">
+                            <h2 class="h5 fw-bold mb-0"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Stock crítico (3 o menos)</h2>
+                            <span id="stockCriticoSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-hidden="true"></span>
                         </div>
-                        <div class="table-responsive">
+                        <div class="table-responsive flex-grow-1">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                 <tr>
@@ -157,7 +168,7 @@
                                     <th class="text-end">Existencias</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tbodyStockCritico">
                                 <tr th:each="producto : ${stockCritico}">
                                     <td th:text="${producto.nombre}">Videojuego</td>
                                     <td th:text="${producto.sku}">SKU</td>
@@ -172,6 +183,13 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Paginación Stock crítico (15 por página) -->
+                        <div class="card-footer bg-light border-top px-3 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                            <small class="text-secondary fw-medium" id="infoStockCritico"></small>
+                            <nav aria-label="Paginación de stock crítico">
+                                <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center" id="paginacionStockCritico"></ul>
+                            </nav>
+                        </div>
                     </section>
                 </div>
             </div>
@@ -179,5 +197,253 @@
         <footer th:replace="~{fragments/footer :: footer}"></footer>
     </div>
 </div>
+
+<script th:inline="javascript">
+    const REPORTES_PAGE_INIT = {
+        desdeVal: /*[[${desde != null ? desde.toString() : ''}]]*/ '',
+        hastaVal: /*[[${hasta != null ? hasta.toString() : ''}]]*/ '',
+        masVendidos: {
+            page: /*[[${productosMasVendidosPage != null ? productosMasVendidosPage.number : 0}]]*/ 0,
+            size: /*[[${productosMasVendidosPage != null ? productosMasVendidosPage.size : 15}]]*/ 15,
+            totalElements: /*[[${productosMasVendidosPage != null ? productosMasVendidosPage.totalElements : #lists.size(productosMasVendidos)}]]*/ 0,
+            totalPages: /*[[${productosMasVendidosPage != null ? productosMasVendidosPage.totalPages : 1}]]*/ 1
+        },
+        stockCritico: {
+            page: /*[[${stockCriticoPage != null ? stockCriticoPage.number : 0}]]*/ 0,
+            size: /*[[${stockCriticoPage != null ? stockCriticoPage.size : 15}]]*/ 15,
+            totalElements: /*[[${stockCriticoPage != null ? stockCriticoPage.totalElements : #lists.size(stockCritico)}]]*/ 0,
+            totalPages: /*[[${stockCriticoPage != null ? stockCriticoPage.totalPages : 1}]]*/ 1
+        }
+    };
+</script>
+
+<script>
+    (function () {
+        const desdeVal = REPORTES_PAGE_INIT.desdeVal;
+        const hastaVal = REPORTES_PAGE_INIT.hastaVal;
+        const stateMasVendidos = Object.assign({}, REPORTES_PAGE_INIT.masVendidos);
+        const stateStockCritico = Object.assign({}, REPORTES_PAGE_INIT.stockCritico);
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function construirPaginasVisibles(actual, total) {
+            if (total <= 7) {
+                return Array.from({ length: total }, (_, i) => i);
+            }
+
+            const paginas = new Set([0, total - 1]);
+            const inicio = Math.max(1, actual - 1);
+            const fin = Math.min(total - 2, actual + 1);
+
+            if (actual <= 2) {
+                paginas.add(1);
+                paginas.add(2);
+                paginas.add(3);
+            } else if (actual >= total - 3) {
+                paginas.add(total - 4);
+                paginas.add(total - 3);
+                paginas.add(total - 2);
+            } else {
+                for (let i = inicio; i <= fin; i++) {
+                    paginas.add(i);
+                }
+            }
+
+            const ordenadas = Array.from(paginas).filter(p => p >= 0 && p < total).sort((a, b) => a - b);
+            const resultado = [];
+            let anterior = -1;
+            ordenadas.forEach(p => {
+                if (anterior !== -1 && p - anterior > 1) {
+                    resultado.push('...');
+                }
+                resultado.push(p);
+                anterior = p;
+            });
+            return resultado;
+        }
+
+        function construirUrlFallback(pageMasVendidos, pageStockCritico) {
+            const params = new URLSearchParams();
+            if (desdeVal) params.set('desde', desdeVal);
+            if (hastaVal) params.set('hasta', hastaVal);
+            params.set('pageMasVendidos', String(pageMasVendidos));
+            params.set('pageStockCritico', String(pageStockCritico));
+            return '/reportes?' + params.toString() + '#seccionTablasSecundarias';
+        }
+
+        function actualizarUrlNavegador() {
+            if (!window.history || !window.history.replaceState) return;
+            const params = new URLSearchParams(window.location.search);
+            if (desdeVal) params.set('desde', desdeVal);
+            if (hastaVal) params.set('hasta', hastaVal);
+            params.set('pageMasVendidos', String(stateMasVendidos.page));
+            params.set('pageStockCritico', String(stateStockCritico.page));
+            window.history.replaceState(null, '', '/reportes?' + params.toString());
+        }
+
+        function renderizarPaginacion(infoEl, ulEl, state, tipo) {
+            if (infoEl) {
+                if (state.totalElements === 0) {
+                    infoEl.textContent = '0 registros';
+                } else {
+                    const desde = state.page * state.size + 1;
+                    const hasta = Math.min((state.page + 1) * state.size, state.totalElements);
+                    infoEl.textContent = `Mostrando ${desde}–${hasta} de ${state.totalElements} (Pág. ${state.page + 1} de ${state.totalPages})`;
+                }
+            }
+
+            if (!ulEl) return;
+            if (!state.totalPages || state.totalPages <= 1) {
+                ulEl.innerHTML = '';
+                return;
+            }
+
+            const actual = state.page;
+            const total = state.totalPages;
+            const items = [];
+
+            const urlFor = (p) => tipo === 'masVendidos'
+                ? construirUrlFallback(p, stateStockCritico.page)
+                : construirUrlFallback(stateMasVendidos.page, p);
+
+            if (actual <= 0) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Anterior"><i class="bi bi-chevron-left"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${urlFor(actual - 1)}" data-page="${actual - 1}" aria-label="Anterior"><i class="bi bi-chevron-left"></i></a></li>`);
+            }
+
+            construirPaginasVisibles(actual, total).forEach(item => {
+                if (item === '...') {
+                    items.push('<li class="page-item disabled"><span class="page-link">…</span></li>');
+                } else if (item === actual) {
+                    items.push(`<li class="page-item active"><span class="page-link" aria-current="page">${item + 1}</span></li>`);
+                } else {
+                    items.push(`<li class="page-item"><a class="page-link" href="${urlFor(item)}" data-page="${item}">${item + 1}</a></li>`);
+                }
+            });
+
+            if (actual >= total - 1) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${urlFor(actual + 1)}" data-page="${actual + 1}" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></a></li>`);
+            }
+
+            ulEl.innerHTML = items.join('');
+        }
+
+        const infoMasVendidos = document.getElementById('infoMasVendidos');
+        const ulMasVendidos = document.getElementById('paginacionMasVendidos');
+        const tbodyMasVendidos = document.getElementById('tbodyMasVendidos');
+        const spinnerMasVendidos = document.getElementById('masVendidosSpinner');
+
+        const infoStockCritico = document.getElementById('infoStockCritico');
+        const ulStockCritico = document.getElementById('paginacionStockCritico');
+        const tbodyStockCritico = document.getElementById('tbodyStockCritico');
+        const spinnerStockCritico = document.getElementById('stockCriticoSpinner');
+
+        async function cargarMasVendidos(pagina) {
+            if (spinnerMasVendidos) spinnerMasVendidos.classList.remove('d-none');
+            try {
+                const resp = await fetch('/reportes/api/mas-vendidos?page=' + encodeURIComponent(pagina));
+                if (!resp.ok) return false;
+                const data = await resp.json();
+
+                stateMasVendidos.page = data.page;
+                stateMasVendidos.size = data.size;
+                stateMasVendidos.totalElements = data.totalElements;
+                stateMasVendidos.totalPages = data.totalPages;
+
+                if (tbodyMasVendidos) {
+                    if (!data.content || data.content.length === 0) {
+                        tbodyMasVendidos.innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-3">Aún no hay productos vendidos.</td></tr>';
+                    } else {
+                        tbodyMasVendidos.innerHTML = data.content.map(item => `
+                            <tr>
+                                <td>${escapeHtml(item.nombre)}</td>
+                                <td class="text-end">${Number(item.unidades || 0)}</td>
+                                <td class="text-end">$${Number(item.ingresos || 0).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+
+                renderizarPaginacion(infoMasVendidos, ulMasVendidos, stateMasVendidos, 'masVendidos');
+                actualizarUrlNavegador();
+                return true;
+            } catch (_) {
+                return false;
+            } finally {
+                if (spinnerMasVendidos) spinnerMasVendidos.classList.add('d-none');
+            }
+        }
+
+        async function cargarStockCritico(pagina) {
+            if (spinnerStockCritico) spinnerStockCritico.classList.remove('d-none');
+            try {
+                const resp = await fetch('/reportes/api/stock-critico?page=' + encodeURIComponent(pagina));
+                if (!resp.ok) return false;
+                const data = await resp.json();
+
+                stateStockCritico.page = data.page;
+                stateStockCritico.size = data.size;
+                stateStockCritico.totalElements = data.totalElements;
+                stateStockCritico.totalPages = data.totalPages;
+
+                if (tbodyStockCritico) {
+                    if (!data.content || data.content.length === 0) {
+                        tbodyStockCritico.innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-3">No hay productos con stock crítico.</td></tr>';
+                    } else {
+                        tbodyStockCritico.innerHTML = data.content.map(item => `
+                            <tr>
+                                <td>${escapeHtml(item.nombre)}</td>
+                                <td>${escapeHtml(item.sku)}</td>
+                                <td class="text-end"><span class="badge text-bg-danger">${Number(item.stock || 0)}</span></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+
+                renderizarPaginacion(infoStockCritico, ulStockCritico, stateStockCritico, 'stockCritico');
+                actualizarUrlNavegador();
+                return true;
+            } catch (_) {
+                return false;
+            } finally {
+                if (spinnerStockCritico) spinnerStockCritico.classList.add('d-none');
+            }
+        }
+
+        if (ulMasVendidos) {
+            ulMasVendidos.addEventListener('click', async function (e) {
+                const link = e.target.closest('a[data-page]');
+                if (!link) return;
+                e.preventDefault();
+                const ok = await cargarMasVendidos(Number(link.dataset.page));
+                if (!ok) window.location.assign(link.href);
+            });
+        }
+
+        if (ulStockCritico) {
+            ulStockCritico.addEventListener('click', async function (e) {
+                const link = e.target.closest('a[data-page]');
+                if (!link) return;
+                e.preventDefault();
+                const ok = await cargarStockCritico(Number(link.dataset.page));
+                if (!ok) window.location.assign(link.href);
+            });
+        }
+
+        renderizarPaginacion(infoMasVendidos, ulMasVendidos, stateMasVendidos, 'masVendidos');
+        renderizarPaginacion(infoStockCritico, ulStockCritico, stateStockCritico, 'stockCritico');
+    })();
+</script>
 </body>
 </html>

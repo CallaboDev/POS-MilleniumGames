@@ -86,11 +86,117 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Barra de Paginación Real Automática (10 empleados por página) -->
+                <div id="paginacionUsuariosContainer"
+                     class="card-footer bg-light border-top px-3 px-md-4 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                    <small class="text-secondary fw-medium" id="paginacionUsuariosInfo"></small>
+                    <nav aria-label="Paginación de empleados">
+                        <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center" id="paginacionUsuarios"></ul>
+                    </nav>
+                </div>
             </section>
         </main>
 
         <footer th:replace="~{fragments/footer :: footer}"></footer>
     </div>
 </div>
+
+<script th:inline="javascript">
+    const USUARIOS_PAGE_STATE = {
+        page: /*[[${usuariosPage != null ? usuariosPage.number : 0}]]*/ 0,
+        size: /*[[${usuariosPage != null ? usuariosPage.size : 10}]]*/ 10,
+        totalElements: /*[[${usuariosPage != null ? usuariosPage.totalElements : #lists.size(usuarios)}]]*/ 0,
+        totalPages: /*[[${usuariosPage != null ? usuariosPage.totalPages : 1}]]*/ 1
+    };
+</script>
+
+<script>
+    (function () {
+        const state = USUARIOS_PAGE_STATE;
+        const infoEl = document.getElementById('paginacionUsuariosInfo');
+        const ulEl = document.getElementById('paginacionUsuarios');
+
+        function construirUrlPagina(pagina) {
+            return '/usuarios?page=' + String(pagina);
+        }
+
+        function construirPaginasVisibles(actual, total) {
+            if (total <= 7) {
+                return Array.from({ length: total }, (_, i) => i);
+            }
+
+            const paginas = new Set([0, total - 1]);
+            const inicio = Math.max(1, actual - 1);
+            const fin = Math.min(total - 2, actual + 1);
+
+            if (actual <= 2) {
+                paginas.add(1);
+                paginas.add(2);
+                paginas.add(3);
+            } else if (actual >= total - 3) {
+                paginas.add(total - 4);
+                paginas.add(total - 3);
+                paginas.add(total - 2);
+            } else {
+                for (let i = inicio; i <= fin; i++) {
+                    paginas.add(i);
+                }
+            }
+
+            const ordenadas = Array.from(paginas).filter(p => p >= 0 && p < total).sort((a, b) => a - b);
+            const resultado = [];
+            let anterior = -1;
+            ordenadas.forEach(p => {
+                if (anterior !== -1 && p - anterior > 1) {
+                    resultado.push('...');
+                }
+                resultado.push(p);
+                anterior = p;
+            });
+            return resultado;
+        }
+
+        if (infoEl) {
+            if (state.totalElements === 0) {
+                infoEl.textContent = '0 empleados encontrados';
+            } else {
+                const desde = state.page * state.size + 1;
+                const hasta = Math.min((state.page + 1) * state.size, state.totalElements);
+                infoEl.textContent = `Mostrando ${desde}–${hasta} de ${state.totalElements} empleados (Pág. ${state.page + 1} de ${state.totalPages})`;
+            }
+        }
+
+        if (ulEl && state.totalPages > 1) {
+            const actual = state.page;
+            const total = state.totalPages;
+            const items = [];
+
+            if (actual <= 0) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Anterior"><i class="bi bi-chevron-left"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(actual - 1)}" aria-label="Anterior"><i class="bi bi-chevron-left"></i></a></li>`);
+            }
+
+            construirPaginasVisibles(actual, total).forEach(item => {
+                if (item === '...') {
+                    items.push('<li class="page-item disabled"><span class="page-link">…</span></li>');
+                } else if (item === actual) {
+                    items.push(`<li class="page-item active"><span class="page-link" aria-current="page">${item + 1}</span></li>`);
+                } else {
+                    items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(item)}">${item + 1}</a></li>`);
+                }
+            });
+
+            if (actual >= total - 1) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(actual + 1)}" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></a></li>`);
+            }
+
+            ulEl.innerHTML = items.join('');
+        }
+    })();
+</script>
 </body>
 </html>

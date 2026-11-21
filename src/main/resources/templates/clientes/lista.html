@@ -17,14 +17,125 @@
                 <div class="col-md-8"><input class="form-control" type="search" name="buscar" th:value="${buscar}" placeholder="Buscar por nombre o correo"></div>
                 <div class="col-md-4 d-flex gap-2"><button class="btn btn-secondary" type="submit">Buscar</button><a th:href="@{/clientes}" class="btn btn-outline-secondary">Limpiar</a></div>
             </div></form>
-            <div class="card border-0 shadow-sm rounded-4"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
-                <thead class="table-light"><tr><th class="ps-4">Nombre completo</th><th>Correo</th><th>Teléfono</th><th class="text-end pe-4">Acciones</th></tr></thead>
-                <tbody><tr th:each="cliente : ${clientes}"><td class="ps-4 fw-semibold" th:text="${cliente.nombreCompleto}"></td><td th:text="${cliente.correo ?: '—'}"></td><td th:text="${cliente.telefono ?: '—'}"></td>
-                    <td class="text-end pe-4"><a class="btn btn-sm btn-outline-primary" th:href="@{/clientes/editar/{id}(id=${cliente.id})}">Editar</a>
-                        <form class="d-inline" method="post" th:action="@{/clientes/eliminar/{id}(id=${cliente.id})}" data-confirm-delete data-confirm-message="¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer."><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
-                    <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="4" class="text-center text-secondary py-4">No hay clientes que coincidan con la búsqueda.</td></tr>
-                </tbody></table></div></div>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+                    <thead class="table-light"><tr><th class="ps-4">Nombre completo</th><th>Correo</th><th>Teléfono</th><th class="text-end pe-4">Acciones</th></tr></thead>
+                    <tbody><tr th:each="cliente : ${clientes}"><td class="ps-4 fw-semibold" th:text="${cliente.nombreCompleto}"></td><td th:text="${cliente.correo ?: '—'}"></td><td th:text="${cliente.telefono ?: '—'}"></td>
+                        <td class="text-end pe-4"><a class="btn btn-sm btn-outline-primary" th:href="@{/clientes/editar/{id}(id=${cliente.id})}">Editar</a>
+                            <form class="d-inline" method="post" th:action="@{/clientes/eliminar/{id}(id=${cliente.id})}" data-confirm-delete data-confirm-message="¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer."><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
+                        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="4" class="text-center text-secondary py-4">No hay clientes que coincidan con la búsqueda.</td></tr>
+                    </tbody></table></div>
+                <!-- Barra de Paginación Real Automática (10 clientes por página) -->
+                <div id="paginacionClientesContainer"
+                     class="card-footer bg-light border-top px-3 px-md-4 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                    <small class="text-secondary fw-medium" id="paginacionClientesInfo"></small>
+                    <nav aria-label="Paginación de clientes">
+                        <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center" id="paginacionClientes"></ul>
+                    </nav>
+                </div>
+            </div>
         </main><footer th:replace="~{fragments/footer :: footer}"></footer>
     </div>
 </div>
+<script th:inline="javascript">
+    const CLIENTES_PAGE_STATE = {
+        page: /*[[${clientesPage != null ? clientesPage.number : 0}]]*/ 0,
+        size: /*[[${clientesPage != null ? clientesPage.size : 10}]]*/ 10,
+        totalElements: /*[[${clientesPage != null ? clientesPage.totalElements : #lists.size(clientes)}]]*/ 0,
+        totalPages: /*[[${clientesPage != null ? clientesPage.totalPages : 1}]]*/ 1,
+        buscar: /*[[${buscar != null ? buscar : ''}]]*/ ''
+    };
+</script>
+<script>
+    (function () {
+        const state = CLIENTES_PAGE_STATE;
+        const infoEl = document.getElementById('paginacionClientesInfo');
+        const ulEl = document.getElementById('paginacionClientes');
+
+        function construirUrlPagina(pagina) {
+            const params = new URLSearchParams();
+            params.set('page', String(pagina));
+            if (state.buscar && state.buscar.length > 0) {
+                params.set('buscar', state.buscar);
+            }
+            return '/clientes?' + params.toString();
+        }
+
+        function construirPaginasVisibles(actual, total) {
+            if (total <= 7) {
+                return Array.from({ length: total }, (_, i) => i);
+            }
+
+            const paginas = new Set([0, total - 1]);
+            const inicio = Math.max(1, actual - 1);
+            const fin = Math.min(total - 2, actual + 1);
+
+            if (actual <= 2) {
+                paginas.add(1);
+                paginas.add(2);
+                paginas.add(3);
+            } else if (actual >= total - 3) {
+                paginas.add(total - 4);
+                paginas.add(total - 3);
+                paginas.add(total - 2);
+            } else {
+                for (let i = inicio; i <= fin; i++) {
+                    paginas.add(i);
+                }
+            }
+
+            const ordenadas = Array.from(paginas).filter(p => p >= 0 && p < total).sort((a, b) => a - b);
+            const resultado = [];
+            let anterior = -1;
+            ordenadas.forEach(p => {
+                if (anterior !== -1 && p - anterior > 1) {
+                    resultado.push('...');
+                }
+                resultado.push(p);
+                anterior = p;
+            });
+            return resultado;
+        }
+
+        if (infoEl) {
+            if (state.totalElements === 0) {
+                infoEl.textContent = '0 clientes encontrados';
+            } else {
+                const desde = state.page * state.size + 1;
+                const hasta = Math.min((state.page + 1) * state.size, state.totalElements);
+                infoEl.textContent = `Mostrando ${desde}–${hasta} de ${state.totalElements} clientes (Pág. ${state.page + 1} de ${state.totalPages})`;
+            }
+        }
+
+        if (ulEl && state.totalPages > 1) {
+            const actual = state.page;
+            const total = state.totalPages;
+            const items = [];
+
+            if (actual <= 0) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Anterior"><i class="bi bi-chevron-left"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(actual - 1)}" aria-label="Anterior"><i class="bi bi-chevron-left"></i></a></li>`);
+            }
+
+            construirPaginasVisibles(actual, total).forEach(item => {
+                if (item === '...') {
+                    items.push('<li class="page-item disabled"><span class="page-link">…</span></li>');
+                } else if (item === actual) {
+                    items.push(`<li class="page-item active"><span class="page-link" aria-current="page">${item + 1}</span></li>`);
+                } else {
+                    items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(item)}">${item + 1}</a></li>`);
+                }
+            });
+
+            if (actual >= total - 1) {
+                items.push('<li class="page-item disabled"><span class="page-link" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></span></li>');
+            } else {
+                items.push(`<li class="page-item"><a class="page-link" href="${construirUrlPagina(actual + 1)}" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></a></li>`);
+            }
+
+            ulEl.innerHTML = items.join('');
+        }
+    })();
+</script>
 </body></html>

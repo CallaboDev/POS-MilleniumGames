@@ -5,6 +5,10 @@ import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.CategoriaService;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.PlataformaService;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.ProductoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/productos")
 public class ProductoController {
+
+    public static final int CATALOGO_PAGE_SIZE = 21;
 
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
@@ -31,12 +37,27 @@ public class ProductoController {
     }
 
     @GetMapping
-    public String listarProductos(@RequestParam(name = "buscar", required = false) String buscar, Model model) {
-        if (buscar != null && !buscar.trim().isEmpty()) {
-            model.addAttribute("productos", productoService.buscarPorNombre(buscar));
-            model.addAttribute("buscar", buscar);
-        } else {
-            model.addAttribute("productos", productoService.obtenerTodos());
+    public String listarProductos(@RequestParam(name = "buscar", required = false) String buscar,
+                                  @RequestParam(name = "page", defaultValue = "0") int page,
+                                  Model model) {
+        String terminoLimpio = (buscar != null && !buscar.trim().isEmpty()) ? buscar.trim() : null;
+        int paginaSegura = Math.max(0, page);
+        Pageable pageable = PageRequest.of(paginaSegura, CATALOGO_PAGE_SIZE, Sort.by(Sort.Direction.ASC, "id"));
+        Page<Producto> paginaProductos = productoService.obtenerPaginado(terminoLimpio, pageable);
+
+        if (paginaSegura > 0 && paginaProductos.getTotalPages() > 0 && paginaSegura >= paginaProductos.getTotalPages()) {
+            Pageable ultimaPagina = PageRequest.of(
+                    paginaProductos.getTotalPages() - 1,
+                    CATALOGO_PAGE_SIZE,
+                    Sort.by(Sort.Direction.ASC, "id")
+            );
+            paginaProductos = productoService.obtenerPaginado(terminoLimpio, ultimaPagina);
+        }
+
+        model.addAttribute("productosPage", paginaProductos);
+        model.addAttribute("productos", paginaProductos.getContent());
+        if (terminoLimpio != null) {
+            model.addAttribute("buscar", terminoLimpio);
         }
         return "inventario/lista";
     }

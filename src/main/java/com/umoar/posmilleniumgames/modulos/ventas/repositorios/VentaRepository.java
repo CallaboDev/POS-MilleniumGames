@@ -1,6 +1,8 @@
 package com.umoar.posmilleniumgames.modulos.ventas.repositorios;
 
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +39,10 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
 
     @Query("select d.producto.nombre, sum(d.cantidad), sum(d.subtotal) from DetalleVenta d group by d.producto.id, d.producto.nombre order by sum(d.cantidad) desc")
     List<Object[]> buscarProductosMasVendidos();
+
+    @Query(
+            value = "select d.producto.nombre, sum(d.cantidad), sum(d.subtotal) from DetalleVenta d group by d.producto.id, d.producto.nombre order by sum(d.cantidad) desc, d.producto.id asc",
+            countQuery = "select count(distinct d.producto.id) from DetalleVenta d"
+    )
+    Page<Object[]> buscarProductosMasVendidosPaginado(Pageable pageable);
 }

@@ -4,6 +4,10 @@ import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Rol;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioDetalles;
 import com.umoar.posmilleniumgames.modulos.usuarios.servicios.UsuarioService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -18,6 +22,8 @@ import java.util.Optional;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    public static final int USUARIOS_PAGE_SIZE = 10;
+
     private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
 
@@ -27,8 +33,24 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public String listar(Model model, Authentication authentication) {
-        model.addAttribute("usuarios", usuarioService.listarUsuarios());
+    public String listar(@RequestParam(name = "page", defaultValue = "0") int page,
+                         Model model,
+                         Authentication authentication) {
+        int paginaSegura = Math.max(0, page);
+        Pageable pageable = PageRequest.of(paginaSegura, USUARIOS_PAGE_SIZE, Sort.by(Sort.Direction.ASC, "id"));
+        Page<Usuario> paginaUsuarios = usuarioService.listarUsuariosPaginado(pageable);
+
+        if (paginaSegura > 0 && paginaUsuarios.getTotalPages() > 0 && paginaSegura >= paginaUsuarios.getTotalPages()) {
+            Pageable ultimaPagina = PageRequest.of(
+                    paginaUsuarios.getTotalPages() - 1,
+                    USUARIOS_PAGE_SIZE,
+                    Sort.by(Sort.Direction.ASC, "id")
+            );
+            paginaUsuarios = usuarioService.listarUsuariosPaginado(ultimaPagina);
+        }
+
+        model.addAttribute("usuariosPage", paginaUsuarios);
+        model.addAttribute("usuarios", paginaUsuarios.getContent());
         model.addAttribute("usuarioActualId", usuarioActualId(authentication));
         return "usuarios/lista";
     }
@@ -159,6 +181,9 @@ public class UsuarioController {
     }
 
     private Long usuarioActualId(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
         if (authentication.getPrincipal() instanceof UsuarioDetalles detalles) {
             return detalles.getUsuario().getId();
         }

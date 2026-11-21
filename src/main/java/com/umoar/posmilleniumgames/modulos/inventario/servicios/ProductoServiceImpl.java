@@ -2,6 +2,8 @@ package com.umoar.posmilleniumgames.modulos.inventario.servicios;
 
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.inventario.repositorios.ProductoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,15 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<Producto> obtenerPaginado(String buscar, Pageable pageable) {
+        if (buscar == null || buscar.trim().isEmpty()) {
+            return productoRepository.findAll(pageable);
+        }
+        return productoRepository.buscarPaginado(buscar.trim(), pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Producto obtenerPorId(Long id) {
         return productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con el ID: " + id));
@@ -43,6 +54,15 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional(readOnly = true)
     public Producto buscarPorSku(String sku) {
         return productoRepository.findBySku(sku).orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Producto buscarPorSkuIgnoreCase(String sku) {
+        if (sku == null || sku.trim().isEmpty()) {
+            return null;
+        }
+        return productoRepository.findFirstBySkuIgnoreCase(sku.trim()).orElse(null);
     }
 
     @Override

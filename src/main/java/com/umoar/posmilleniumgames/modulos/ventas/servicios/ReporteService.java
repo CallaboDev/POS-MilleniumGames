@@ -2,6 +2,8 @@ package com.umoar.posmilleniumgames.modulos.ventas.servicios;
 
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,11 +28,15 @@ public interface ReporteService {
 
     List<Producto> productosConStockCritico();
 
+    Page<Producto> productosConStockCriticoPaginado(Pageable pageable);
+
     List<Object[]> productosMasVendidos();
- 
+
+    Page<Object[]> productosMasVendidosPaginado(Pageable pageable);
+
     long totalVideojuegos();
- 
+
     long totalClientes();
- 
+
     long totalPersonal();
 }
