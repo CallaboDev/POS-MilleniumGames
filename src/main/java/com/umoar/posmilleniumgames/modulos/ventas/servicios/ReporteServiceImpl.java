@@ -6,6 +6,8 @@ import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioReposito
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Venta;
 import com.umoar.posmilleniumgames.modulos.ventas.repositorios.ClienteRepository;
 import com.umoar.posmilleniumgames.modulos.ventas.repositorios.VentaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,8 +84,18 @@ public class ReporteServiceImpl implements ReporteService {
     }
 
     @Override
+    public Page<Producto> productosConStockCriticoPaginado(Pageable pageable) {
+        return productoRepository.findByStockLessThanEqual(LIMITE_STOCK_CRITICO, pageable);
+    }
+
+    @Override
     public List<Object[]> productosMasVendidos() {
         return ventaRepository.buscarProductosMasVendidos().stream().limit(5).toList();
+    }
+
+    @Override
+    public Page<Object[]> productosMasVendidosPaginado(Pageable pageable) {
+        return ventaRepository.buscarProductosMasVendidosPaginado(pageable);
     }
 
     @Override
@@ -101,4 +113,3 @@ public class ReporteServiceImpl implements ReporteService {
         return usuarioRepository.count();
     }
 }
-

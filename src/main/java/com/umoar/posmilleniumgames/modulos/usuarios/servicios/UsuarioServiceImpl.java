@@ -4,6 +4,8 @@ import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Rol;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
 import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.RolRepository;
 import com.umoar.posmilleniumgames.modulos.usuarios.repositorios.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Usuario> listarUsuariosPaginado(Pageable pageable) {
+        return usuarioRepository.findAll(pageable);
     }
 
     @Override

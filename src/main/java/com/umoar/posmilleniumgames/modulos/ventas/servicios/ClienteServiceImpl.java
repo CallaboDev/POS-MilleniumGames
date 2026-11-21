@@ -2,6 +2,8 @@ package com.umoar.posmilleniumgames.modulos.ventas.servicios;
 
 import com.umoar.posmilleniumgames.modulos.ventas.modelos.Cliente;
 import com.umoar.posmilleniumgames.modulos.ventas.repositorios.ClienteRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,15 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional(readOnly = true)
     public List<Cliente> obtenerTodos() {
         return clienteRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Cliente> listarPaginado(String criterio, Pageable pageable) {
+        if (criterio == null || criterio.isBlank()) {
+            return clienteRepository.findAll(pageable);
+        }
+        return clienteRepository.buscarPaginado(criterio.trim(), pageable);
     }
 
     @Override
