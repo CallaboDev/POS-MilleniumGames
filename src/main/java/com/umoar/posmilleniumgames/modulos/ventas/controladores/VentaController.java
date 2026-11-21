@@ -1,5 +1,6 @@
 package com.umoar.posmilleniumgames.modulos.ventas.controladores;
 
+import com.umoar.posmilleniumgames.modulos.inventario.dto.ProductoResponseDTO;
 import com.umoar.posmilleniumgames.modulos.inventario.modelos.Producto;
 import com.umoar.posmilleniumgames.modulos.inventario.servicios.ProductoService;
 import com.umoar.posmilleniumgames.modulos.usuarios.modelos.Usuario;
@@ -10,6 +11,10 @@ import com.umoar.posmilleniumgames.modulos.ventas.servicios.ClienteService;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.RegistroVentaDTO;
 import com.umoar.posmilleniumgames.modulos.ventas.servicios.VentaService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,6 +29,8 @@ import java.util.Map;
 
 @Controller
 public class VentaController {
+
+    public static final int CAJA_PAGE_SIZE = 21;
 
     private final VentaService ventaService;
     private final ProductoService productoService;
@@ -44,11 +51,18 @@ public class VentaController {
      * Pantalla principal del Punto de Venta (Caja / POS)
      */
     @GetMapping({"/caja", "/ventas/caja"})
-    public String mostrarCaja(Model model, HttpSession session, Authentication authentication) {
+    public String mostrarCaja(@RequestParam(defaultValue = "0") int page,
+                              @RequestParam(required = false) String buscar,
+                              Model model,
+                              HttpSession session,
+                              Authentication authentication) {
         Usuario usuario = resolverUsuario(session, authentication);
+        Page<Producto> paginaProductos = obtenerPaginaCaja(buscar, page, CAJA_PAGE_SIZE);
 
         model.addAttribute("usuarioActual", usuario);
-        model.addAttribute("productos", productoService.obtenerTodos());
+        model.addAttribute("productosPage", paginaProductos);
+        model.addAttribute("productos", paginaProductos.getContent());
+        model.addAttribute("buscar", buscar != null ? buscar.trim() : "");
         model.addAttribute("clientes", clienteService.obtenerTodos());
         model.addAttribute("consumidorFinal", clienteService.obtenerOCrearConsumidorFinal());
         model.addAttribute("proximoNumeroFactura", ventaService.generarNumeroFactura());
@@ -57,15 +71,65 @@ public class VentaController {
     }
 
     /**
-     * Endpoint API para búsqueda rápida / escaneo de SKU desde JS
+     * Endpoint API paginado para búsqueda y navegación rápida en caja sin perder el carrito
      */
     @GetMapping("/caja/api/productos")
     @ResponseBody
-    public List<Producto> apiListarProductos(@RequestParam(required = false) String buscar) {
-        if (buscar != null && !buscar.isBlank()) {
-            return productoService.buscarPorNombre(buscar);
+    public PaginaProductosCajaDTO apiListarProductos(
+            @RequestParam(required = false) String buscar,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "21") int size) {
+        int tamano = (size > 0 && size <= 100) ? size : CAJA_PAGE_SIZE;
+        Page<Producto> pagina = obtenerPaginaCaja(buscar, page, tamano);
+
+        List<ProductoResponseDTO> contenido = pagina.getContent().stream()
+                .map(ProductoResponseDTO::fromEntity)
+                .toList();
+
+        return new PaginaProductosCajaDTO(
+                contenido,
+                pagina.getNumber(),
+                pagina.getSize(),
+                pagina.getTotalElements(),
+                pagina.getTotalPages(),
+                pagina.isFirst(),
+                pagina.isLast()
+        );
+    }
+
+    /**
+     * Endpoint API para escaneo exacto de SKU / código de barras
+     */
+    @GetMapping("/caja/api/productos/sku")
+    @ResponseBody
+    public ResponseEntity<ProductoResponseDTO> apiBuscarPorSku(@RequestParam String sku) {
+        Producto producto = productoService.buscarPorSkuIgnoreCase(sku);
+        if (producto == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return productoService.obtenerTodos();
+        return ResponseEntity.ok(ProductoResponseDTO.fromEntity(producto));
+    }
+
+    private Page<Producto> obtenerPaginaCaja(String buscar, int page, int size) {
+        int paginaSegura = Math.max(0, page);
+        Pageable pageable = PageRequest.of(paginaSegura, size, Sort.by(Sort.Direction.ASC, "id"));
+        Page<Producto> pagina = productoService.obtenerPaginado(buscar, pageable);
+        if (paginaSegura > 0 && pagina.getTotalPages() > 0 && paginaSegura >= pagina.getTotalPages()) {
+            Pageable ultimaPagina = PageRequest.of(pagina.getTotalPages() - 1, size, Sort.by(Sort.Direction.ASC, "id"));
+            pagina = productoService.obtenerPaginado(buscar, ultimaPagina);
+        }
+        return pagina;
+    }
+
+    public record PaginaProductosCajaDTO(
+            List<ProductoResponseDTO> content,
+            int page,
+            int size,
+            long totalElements,
+            int totalPages,
+            boolean first,
+            boolean last
+    ) {
     }
 
     /**

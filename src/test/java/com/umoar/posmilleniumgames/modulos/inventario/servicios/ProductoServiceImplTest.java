@@ -5,6 +5,10 @@ import com.umoar.posmilleniumgames.modulos.inventario.repositorios.ProductoRepos
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,6 +55,45 @@ class ProductoServiceImplTest {
         assertEquals(1, resultado.size());
         verify(productoRepository).findAll();
         verify(productoRepository, never()).findByNombreContainingIgnoreCase(anyString());
+    }
+
+    @Test
+    void testObtenerPaginadoSinFiltroUsaFindAllPageable() {
+        Pageable pageable = PageRequest.of(0, 21);
+        Page<Producto> esperada = new PageImpl<>(List.of(new Producto()), pageable, 1);
+        when(productoRepository.findAll(pageable)).thenReturn(esperada);
+
+        Page<Producto> resultado = productoService.obtenerPaginado("   ", pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        verify(productoRepository).findAll(pageable);
+        verify(productoRepository, never()).buscarPaginado(anyString(), any());
+    }
+
+    @Test
+    void testObtenerPaginadoConFiltroUsaBuscarPaginado() {
+        Pageable pageable = PageRequest.of(0, 21);
+        Page<Producto> esperada = new PageImpl<>(List.of(new Producto()), pageable, 1);
+        when(productoRepository.buscarPaginado("Zelda", pageable)).thenReturn(esperada);
+
+        Page<Producto> resultado = productoService.obtenerPaginado("  Zelda ", pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        verify(productoRepository).buscarPaginado("Zelda", pageable);
+        verify(productoRepository, never()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void testBuscarPorSkuIgnoreCase() {
+        Producto producto = new Producto();
+        producto.setSku("PERF-00001");
+        when(productoRepository.findFirstBySkuIgnoreCase("perf-00001")).thenReturn(Optional.of(producto));
+
+        Producto resultado = productoService.buscarPorSkuIgnoreCase("  perf-00001 ");
+
+        assertNotNull(resultado);
+        assertEquals("PERF-00001", resultado.getSku());
+        assertNull(productoService.buscarPorSkuIgnoreCase("   "));
     }
 
     @Test
