@@ -1,6 +1,9 @@
 package com.umoar.posmilleniumgames.configuraciones;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.web.server.context.WebServerApplicationContext;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -10,35 +13,64 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @Component
+@Profile("!test")
+@ConditionalOnProperty(name = "app.browser.auto-open", havingValue = "true", matchIfMissing = true)
 public class BrowserLauncherConfig {
 
-    private static final String APP_URL = "http://localhost:8080";
+    static final String BROWSER_OPENED_SYSTEM_PROPERTY = "pos.milleniumgames.browser.opened";
 
     @EventListener(ApplicationReadyEvent.class)
-    public void abrirNavegadorAlIniciar() {
-        // 1. Evitar la ejecución en entornos de producción/cloud como Render o servidores sin entorno gráfico
+    public void abrirNavegadorAlIniciar(ApplicationReadyEvent event) {
+        // 1. Solo abrir si hay un servidor web embebido real escuchando (evita @SpringBootTest en modo MOCK)
+        if (event == null
+                || !(event.getApplicationContext() instanceof WebServerApplicationContext webServerContext)
+                || webServerContext.getWebServer() == null) {
+            return;
+        }
+
+        // 2. Evitar apertura durante la ejecución de pruebas automatizadas (incluso con RANDOM_PORT / DEFINED_PORT)
+        if (esEjecucionDePruebas()) {
+            return;
+        }
+
+        // 3. Evitar la ejecución en entornos de producción/cloud como Render o servidores sin entorno gráfico
         if (esServidorORender()) {
             System.out.println("Servidor o entorno Render detectado. Se omite la apertura automática del navegador web.");
             return;
         }
 
-        // 2. Detección multiplataforma del sistema operativo
-        String os = System.getProperty("os.name").toLowerCase();
+        // 4. Evitar reabrir pestañas en reinicios en caliente de spring-boot-devtools (RestartClassLoader)
+        if (System.getProperties().putIfAbsent(BROWSER_OPENED_SYSTEM_PROPERTY, "true") != null) {
+            return;
+        }
+
+        String appUrl = construirUrlAplicacion(webServerContext);
+        abrirNavegador(appUrl);
+    }
+
+    protected void abrirNavegador(String appUrl) {
+        String os = System.getProperty("os.name", "").toLowerCase();
 
         try {
             if (os.contains("win") || os.contains("mac")) {
-                // 3. Para Windows y macOS, intentar usar java.awt.Desktop.getDesktop().browse()
-                abrirEnWindowsOMac(os, APP_URL);
+                abrirEnWindowsOMac(os, appUrl);
             } else if (os.contains("linux") || os.contains("nix") || os.contains("nux")) {
-                // 4. Para Linux, usar Runtime.getRuntime().exec() con xdg-open (o brave / google-chrome como fallback)
-                abrirEnLinux(APP_URL);
+                abrirEnLinux(appUrl);
             } else {
-                System.err.println("Advertencia: Sistema operativo no reconocido (" + os + "). Por favor abre manualmente: " + APP_URL);
+                System.err.println("Advertencia: Sistema operativo no reconocido (" + os + "). Por favor abre manualmente: " + appUrl);
             }
         } catch (Exception e) {
-            // 5. Manejo general de excepciones para asegurar que Spring Boot no se detenga
             System.err.println("Advertencia: No se pudo abrir el navegador automáticamente: " + e.getMessage());
         }
+    }
+
+    private String construirUrlAplicacion(WebServerApplicationContext webServerContext) {
+        int port = webServerContext.getWebServer().getPort();
+        String contextPath = webServerContext.getEnvironment().getProperty("server.servlet.context-path", "");
+        if (!contextPath.isBlank() && !contextPath.startsWith("/")) {
+            contextPath = "/" + contextPath;
+        }
+        return "http://localhost:" + port + contextPath;
     }
 
     private void abrirEnWindowsOMac(String os, String url) {
@@ -46,11 +78,10 @@ public class BrowserLauncherConfig {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 Desktop.getDesktop().browse(new URI(url));
             } else {
-                // Fallback por comandos si Desktop no está disponible o está en modo headless
                 if (os.contains("win")) {
-                    Runtime.getRuntime().exec(new String[]{"rundll32", "url.dll,FileProtocolHandler", url});
+                    new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
                 } else if (os.contains("mac")) {
-                    Runtime.getRuntime().exec(new String[]{"open", url});
+                    new ProcessBuilder("open", url).start();
                 }
             }
         } catch (IOException | URISyntaxException e) {
@@ -66,7 +97,7 @@ public class BrowserLauncherConfig {
 
         for (String comando : comandos) {
             try {
-                Runtime.getRuntime().exec(new String[]{comando, url});
+                new ProcessBuilder(comando, url).start();
                 abierto = true;
                 break;
             } catch (IOException e) {
@@ -79,7 +110,19 @@ public class BrowserLauncherConfig {
         }
     }
 
-    private boolean esServidorORender() {
+    protected boolean esEjecucionDePruebas() {
+        return StackWalker.getInstance().walk(frames -> frames.anyMatch(frame -> {
+            String className = frame.getClassName();
+            return className.startsWith("org.junit.")
+                    || className.startsWith("org.springframework.test.")
+                    || className.startsWith("org.apache.maven.surefire.")
+                    || className.startsWith("org.apache.maven.failsafe.")
+                    || className.startsWith("com.intellij.rt.junit.")
+                    || className.startsWith("worker.org.gradle.");
+        }));
+    }
+
+    protected boolean esServidorORender() {
         // Render inyecta la variable de entorno RENDER=true
         String renderEnv = System.getenv("RENDER");
         if (renderEnv != null && !renderEnv.isBlank()) {
