@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title th:text="'Ticket ' + ${venta.numeroFactura} + ' | Millenium Games POS'">Comprobante de Venta | Millenium Games POS</title>
 
     <!-- Google Fonts -->
@@ -45,6 +45,35 @@
             font-size: 0.88rem;
         }
 
+        @media screen and (max-width: 575.98px) {
+            body {
+                padding: max(14px, env(safe-area-inset-top)) 10px max(20px, env(safe-area-inset-bottom));
+            }
+
+            .ticket-actions {
+                max-width: 420px;
+                margin-inline: auto;
+            }
+
+            .ticket-actions .btn {
+                min-height: 44px;
+                flex: 1 1 calc(50% - 0.25rem);
+                justify-content: center;
+            }
+
+            .ticket-actions .ticket-print-btn {
+                flex: 1 1 100%;
+            }
+
+            .ticket-card {
+                padding: 20px 16px;
+            }
+
+            .ticket-table td.text-truncate {
+                max-width: 115px !important;
+            }
+        }
+
         /* Estilos específicos para impresión física / térmica */
         @media print {
             body {
@@ -78,8 +107,8 @@
 
 <div class="container">
     <!-- Barra de acciones en pantalla (Oculta al imprimir) -->
-    <div class="no-print d-flex justify-content-center gap-2 mb-4">
-        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
+    <div class="no-print d-flex flex-wrap justify-content-center gap-2 mb-4 ticket-actions">
+        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 ticket-print-btn"
                 onclick="window.print()">
             <i class="bi bi-printer-fill fs-5"></i>
             <span>Imprimir Ticket</span>
@@ -108,23 +137,23 @@
 
         <!-- Metadatos de la Venta -->
         <div style="font-size: 0.85rem;">
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between gap-2">
                 <span>COMPROBANTE:</span>
                 <strong th:text="${venta.numeroFactura}">FAC-00001</strong>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between gap-2">
                 <span>FECHA:</span>
                 <span th:text="${#temporals.format(venta.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">11/10/2026 12:45:00</span>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between gap-2">
                 <span>CAJERO:</span>
-                <span th:text="${venta.usuario != null ? venta.usuario.nombre : 'Caja Principal'}">Cajero</span>
+                <span class="text-end" th:text="${venta.usuario != null ? venta.usuario.nombre : 'Caja Principal'}">Cajero</span>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between gap-2">
                 <span>CLIENTE:</span>
-                <span th:text="${venta.cliente != null ? venta.cliente.nombreCompleto : 'Consumidor Final'}">Consumidor Final</span>
+                <span class="text-end" th:text="${venta.cliente != null ? venta.cliente.nombreCompleto : 'Consumidor Final'}">Consumidor Final</span>
             </div>
-            <div th:if="${venta.cliente != null and venta.cliente.telefono != null and venta.cliente.telefono != 'N/A'}" class="d-flex justify-content-between">
+            <div th:if="${venta.cliente != null and venta.cliente.telefono != null and venta.cliente.telefono != 'N/A'}" class="d-flex justify-content-between gap-2">
                 <span>TEL:</span>
                 <span th:text="${venta.cliente.telefono}">7890-1234</span>
             </div>

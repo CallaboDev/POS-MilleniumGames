@@ -28,15 +28,15 @@
             </div>
 
             <!-- Header de Sección -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 gap-md-3 mb-3 mb-md-4 pb-2 border-bottom">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">Catálogo de Productos</h1>
-                    <p class="text-secondary mb-0">Gestión de inventario de videojuegos, consolas y accesorios.</p>
+                    <p class="text-secondary mb-0 d-none d-md-block">Gestión de inventario de videojuegos, consolas y accesorios.</p>
                 </div>
                 <!-- Botón Nuevo Producto: Visible ÚNICAMENTE para Administradores -->
                 <div sec:authorize="hasRole('ADMIN')">
                     <a th:href="@{/productos/nuevo}"
-                       class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3">
+                       class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 mobile-full-cta">
                         <i class="bi bi-plus-lg"></i>
                         <span>Nuevo Producto</span>
                     </a>
@@ -44,7 +44,7 @@
             </div>
 
             <!-- Filtro de Búsqueda -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-3 mb-md-4">
                 <div class="card-body p-3 p-sm-4">
                     <form th:action="@{/productos}" method="get" class="row g-2 align-items-center">
                         <div class="col-12 col-md-8 col-lg-6">
@@ -69,7 +69,7 @@
             <div class="card border-0 shadow-sm rounded-4 bg-white">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0 table-mobile-cards table-mobile-inventario">
                             <thead class="table-light">
                             <tr>
                                 <th class="ps-4" style="width: 80px;">Portada</th>
@@ -84,7 +84,7 @@
                             </thead>
                             <tbody>
                             <tr th:each="producto : ${productos}">
-                                <td class="ps-4">
+                                <td data-label="Portada" class="ps-4 td-thumb">
                                     <img th:if="${producto.imagen != null}" th:src="@{'/uploads/' + ${producto.imagen}}"
                                          class="rounded border object-fit-cover" style="width: 48px; height: 48px;"
                                          alt="Portada">
@@ -94,25 +94,27 @@
                                         <i class="bi bi-controller fs-4"></i>
                                     </div>
                                 </td>
-                                <td class="fw-semibold text-secondary" th:text="${producto.sku}">SKU-001</td>
-                                <td>
-                                    <span class="fw-bold text-dark d-block" th:text="${producto.nombre}">Nombre del Producto</span>
-                                    
-                                    <!-- Botón pequeño para abrir mini modal / globo de descripción -->
-                                    <button th:if="${producto.descripcion != null and !producto.descripcion.isBlank()}"
-                                            type="button"
-                                            class="btn btn-outline-secondary btn-sm py-0 px-2 mt-1 rounded-pill d-inline-flex align-items-center gap-1 border-0 bg-light"
-                                            style="font-size: 0.72rem; line-height: 1.4;"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#modalDesc' + ${producto.id}"
-                                            title="Ver descripción">
-                                        <i class="bi bi-card-text text-primary"></i>
-                                        <span>Descripción</span>
-                                    </button>
-                                    <small th:unless="${producto.descripcion != null and !producto.descripcion.isBlank()}"
-                                           class="text-muted fst-italic d-block mt-1" style="font-size: 0.72rem;">
-                                        Sin descripción
-                                    </small>
+                                <td data-label="SKU" class="fw-semibold text-secondary td-sku" th:text="${producto.sku}">SKU-001</td>
+                                <td data-label="Producto" class="td-producto">
+                                    <div class="min-w-0">
+                                        <span class="fw-bold text-dark d-block" th:text="${producto.nombre}">Nombre del Producto</span>
+
+                                        <!-- Botón pequeño para abrir mini modal / globo de descripción -->
+                                        <button th:if="${producto.descripcion != null and !producto.descripcion.isBlank()}"
+                                                type="button"
+                                                class="btn btn-outline-secondary btn-sm py-0 px-2 mt-1 rounded-pill d-inline-flex align-items-center gap-1 border-0 bg-light"
+                                                style="font-size: 0.72rem; line-height: 1.4;"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#modalDesc' + ${producto.id}"
+                                                title="Ver descripción">
+                                            <i class="bi bi-card-text text-primary"></i>
+                                            <span>Descripción</span>
+                                        </button>
+                                        <small th:unless="${producto.descripcion != null and !producto.descripcion.isBlank()}"
+                                               class="text-muted fst-italic d-block mt-1" style="font-size: 0.72rem;">
+                                            Sin descripción
+                                        </small>
+                                    </div>
 
                                     <!-- Mini Modal: Descripción del Producto -->
                                     <div th:if="${producto.descripcion != null and !producto.descripcion.isBlank()}"
@@ -140,23 +142,23 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Categoría" class="td-cat">
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill"
                                           th:text="${producto.categoria != null ? producto.categoria.nombre : 'N/A'}">Categoría</span>
                                 </td>
-                                <td>
+                                <td data-label="Plataforma" class="td-plat">
                                     <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill"
                                           th:text="${producto.plataforma != null ? producto.plataforma.nombre : 'N/A'}">Plataforma</span>
                                 </td>
-                                <td class="fw-bold text-dark"
+                                <td data-label="Precio" class="fw-bold text-dark td-precio"
                                     th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'POINT')}">
                                     $0.00
                                 </td>
-                                <td>
+                                <td data-label="Stock" class="td-stock">
                                     <span th:class="${producto.stock > 5 ? 'badge bg-success-subtle text-success' : (producto.stock > 0 ? 'badge bg-warning-subtle text-warning-emphasis' : 'badge bg-danger-subtle text-danger')}"
                                           th:text="${producto.stock + ' unids.'}">0 unids.</span>
                                 </td>
-                                <td sec:authorize="hasRole('ADMIN')" class="text-end pe-4">
+                                <td sec:authorize="hasRole('ADMIN')" class="text-end pe-4 td-actions">
                                     <a th:href="@{'/productos/editar/' + ${producto.id}}"
                                        class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                         <i class="bi bi-pencil"></i>
@@ -169,7 +171,7 @@
                                     </a>
                                 </td>
                             </tr>
-                            <tr th:if="${#lists.isEmpty(productos)}">
+                            <tr th:if="${#lists.isEmpty(productos)}" class="table-empty-row">
                                 <td th:colspan="${#authorization.expression('hasRole(''ADMIN'')')} ? 8 : 7" class="text-center py-4 text-muted">
                                     No se encontraron productos registrados.
                                 </td>

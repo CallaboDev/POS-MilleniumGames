@@ -10,17 +10,17 @@
     <div class="main-wrapper" id="mainWrapper">
         <header th:replace="~{fragments/navbar :: navbar}"></header>
         <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 gap-md-3 mb-3 mb-md-4 pb-2 pb-md-3 border-bottom">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">Dashboard</h1>
-                    <p class="text-secondary mb-0">Resumen actualizado de ventas e inventario.</p>
+                    <p class="text-secondary mb-0 d-none d-md-block">Resumen actualizado de ventas e inventario.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <a th:href="@{/}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                    <a th:href="@{/}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 mobile-full-cta">
                         <i class="bi bi-arrow-left"></i>
                         <span>Volver al panel principal</span>
                     </a>
-                    <a th:href="@{/reportes}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                    <a th:href="@{/reportes}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2 mobile-full-cta">
                         <i class="bi bi-graph-up"></i>
                         <span>Ver reportes</span>
                     </a>
@@ -28,9 +28,9 @@
             </div>
 
             <h2 class="h5 fw-bold mb-3">Resumen Financiero y de Ventas</h2>
-            <div class="row g-3 g-lg-4 mb-5">
-                <div class="col-12 col-md-6 col-xl-3">
-                    <article class="metric-card p-4 h-100 border-start border-4 border-primary">
+            <div class="row g-2 g-md-3 g-lg-4 mb-4 mb-md-5">
+                <div class="col-6 col-xl-3">
+                    <article class="metric-card mobile-compact-metric p-3 p-lg-4 h-100 border-start border-4 border-primary">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold">Ingresos de hoy</span>
@@ -43,8 +43,8 @@
                     </article>
                 </div>
 
-                <div class="col-12 col-md-6 col-xl-3">
-                    <article class="metric-card p-4 h-100 border-start border-4 border-warning">
+                <div class="col-6 col-xl-3">
+                    <article class="metric-card mobile-compact-metric p-3 p-lg-4 h-100 border-start border-4 border-warning">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold">Ingresos del mes</span>
@@ -60,8 +60,8 @@
                     </article>
                 </div>
 
-                <div class="col-12 col-md-6 col-xl-3">
-                    <article class="metric-card p-4 h-100 border-start border-4 border-info">
+                <div class="col-6 col-xl-3">
+                    <article class="metric-card mobile-compact-metric p-3 p-lg-4 h-100 border-start border-4 border-info">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold">Total de ventas</span>
@@ -69,12 +69,12 @@
                             </div>
                             <div class="metric-icon-box bg-info-subtle text-info"><i class="bi bi-receipt"></i></div>
                         </div>
-                        <span class="small text-secondary">Facturas registradas</span>
+                        <span class="small text-secondary d-none d-sm-inline">Facturas registradas</span>
                     </article>
                 </div>
 
-                <div class="col-12 col-md-6 col-xl-3">
-                    <article class="metric-card p-4 h-100 border-start border-4 border-success">
+                <div class="col-6 col-xl-3">
+                    <article class="metric-card mobile-compact-metric p-3 p-lg-4 h-100 border-start border-4 border-success">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="text-secondary small text-uppercase fw-semibold">Ventas del mes</span>
@@ -83,7 +83,7 @@
                             <div class="metric-icon-box bg-success-subtle text-success"><i
                                     class="bi bi-receipt-cutoff"></i></div>
                         </div>
-                        <span class="small text-secondary">Facturas emitidas este mes</span>
+                        <span class="small text-secondary d-none d-sm-inline">Facturas emitidas este mes</span>
                     </article>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                     <span class="badge text-bg-danger" th:text="${productosPorAgotarse}">0</span>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 table-mobile-cards table-mobile-compact-2col">
                         <thead class="table-light">
                         <tr>
                             <th>Videojuego / Producto</th>
@@ -109,13 +109,13 @@
                         </thead>
                         <tbody>
                         <tr th:each="producto : ${stockCritico}">
-                            <td class="fw-semibold" th:text="${producto.nombre}">Producto</td>
-                            <td th:text="${producto.sku}">SKU</td>
-                            <td class="text-end"><span class="badge text-bg-danger" th:text="${producto.stock}">0</span>
+                            <td data-label="Producto" class="fw-semibold td-primary" th:text="${producto.nombre}">Producto</td>
+                            <td data-label="SKU" class="td-secondary" th:text="${producto.sku}">SKU</td>
+                            <td data-label="Existencias" class="text-end td-metric"><span class="badge text-bg-danger" th:text="${producto.stock}">0</span>
                             </td>
-                            <td><span class="badge text-bg-danger">Reabastecer</span></td>
+                            <td data-label="Estado" class="td-metric-sub"><span class="badge text-bg-danger">Reabastecer</span></td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(stockCritico)}">
+                        <tr th:if="${#lists.isEmpty(stockCritico)}" class="table-empty-row">
                             <td colspan="4" class="text-center text-secondary py-4">No hay productos con stock
                                 crítico.
                             </td>

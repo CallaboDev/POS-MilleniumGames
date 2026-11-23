@@ -12,32 +12,32 @@
         <header th:replace="~{fragments/navbar :: navbar}"></header>
 
         <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
-            <div class="mb-4 pb-3 border-bottom">
-                <a th:href="@{/usuarios}" class="text-decoration-none small fw-semibold d-inline-flex align-items-center gap-1 mb-3">
+            <div class="mb-3 mb-md-4 pb-2 pb-md-3 border-bottom">
+                <a th:href="@{/usuarios}" class="text-decoration-none small fw-semibold d-inline-flex align-items-center gap-1 mb-2 mb-md-3">
                     <i class="bi bi-arrow-left"></i>
                     Volver a personal
                 </a>
                 <h1 class="h3 fw-bold text-dark mb-1"
                     th:text="${esEdicion} ? 'Editar empleado' : 'Nuevo empleado'">Nuevo empleado</h1>
-                <p class="text-secondary mb-0" th:text="${esEdicion} ? 'Actualiza la información de acceso y el rol del empleado. Los cambios se aplican al guardar.' : 'Completa los datos de acceso y asigna un rol.'">Completa los datos de acceso y asigna un rol.</p>
+                <p class="text-secondary mb-0 d-none d-md-block" th:text="${esEdicion} ? 'Actualiza la información de acceso y el rol del empleado. Los cambios se aplican al guardar.' : 'Completa los datos de acceso y asigna un rol.'">Completa los datos de acceso y asigna un rol.</p>
             </div>
 
             <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}"></div>
 
-            <div class="alert alert-info d-flex gap-3 align-items-start mb-4" role="note" th:if="${esEdicion}">
+            <div class="alert alert-info d-flex gap-3 align-items-start mb-3 mb-md-4" role="note" th:if="${esEdicion}">
                 <i class="bi bi-info-circle-fill fs-5" aria-hidden="true"></i>
                 <div>
                     <strong>Estás editando a <span th:text="${usuario.nombre}">empleado</span>.</strong>
-                    <div class="small mt-1">Puedes cambiar su nombre, usuario y rol. Para conservar la contraseña actual, deja el campo de nueva contraseña vacío.</div>
-                    <div class="small mt-1" th:if="${esCuentaPropia}">Esta es tu cuenta. Puedes actualizar tus datos, pero no podrás eliminarla.</div>
+                    <div class="small mt-1 d-none d-sm-block">Puedes cambiar su nombre, usuario y rol. Para conservar la contraseña actual, deja el campo de nueva contraseña vacío.</div>
+                    <div class="small mt-1 d-none d-sm-block" th:if="${esCuentaPropia}">Esta es tu cuenta. Puedes actualizar tus datos, pero no podrás eliminarla.</div>
                 </div>
             </div>
-            <div class="alert alert-info d-flex gap-3 align-items-start mb-4" role="note" th:unless="${esEdicion}">
+            <div class="alert alert-info d-flex gap-3 align-items-start mb-3 mb-md-4" role="note" th:unless="${esEdicion}">
                 <i class="bi bi-person-plus-fill fs-5" aria-hidden="true"></i>
                 <div>
                     <strong>Vas a crear una nueva cuenta de empleado.</strong>
-                    <div class="small mt-1">Ingresa el nombre y los datos de acceso que utilizará para iniciar sesión.</div>
-                    <div class="small mt-1">La contraseña es obligatoria y se guardará de forma segura.</div>
+                    <div class="small mt-1 d-none d-sm-block">Ingresa el nombre y los datos de acceso que utilizará para iniciar sesión.</div>
+                    <div class="small mt-1 d-none d-sm-block">La contraseña es obligatoria y se guardará de forma segura.</div>
                 </div>
             </div>
 

@@ -12,13 +12,13 @@
         <header th:replace="~{fragments/navbar :: navbar}"></header>
 
         <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 gap-md-3 mb-3 mb-md-4 pb-2 pb-md-3 border-bottom">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">Personal</h1>
-                    <p class="text-secondary mb-0">Administra las cuentas y roles de los empleados.</p>
+                    <p class="text-secondary mb-0 d-none d-md-block">Administra las cuentas y roles de los empleados.</p>
                 </div>
                 <a th:href="@{/usuarios/nuevo}"
-                   class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3">
+                   class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 mobile-full-cta">
                     <i class="bi bi-plus-lg"></i>
                     <span>Nuevo empleado</span>
                 </a>
@@ -38,7 +38,7 @@
                     <h2 class="h5 fw-bold mb-0">Empleados registrados</h2>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 table-mobile-cards table-mobile-usuarios">
                         <thead class="table-light">
                         <tr>
                             <th scope="col" class="px-3 px-md-4">ID</th>
@@ -50,26 +50,26 @@
                         </thead>
                         <tbody>
                         <tr th:each="usuario : ${usuarios}">
-                            <td class="px-3 px-md-4 text-secondary" th:text="${usuario.id}"></td>
-                            <td class="fw-semibold text-white" th:text="${usuario.username}"></td>
-                            <td class="text-white" th:text="${usuario.nombre}"></td>
-                            <td>
+                            <td data-label="ID" class="px-3 px-md-4 text-secondary td-user-id" th:text="${usuario.id}"></td>
+                            <td data-label="Usuario" class="fw-semibold text-white td-user-username" th:text="${usuario.username}"></td>
+                            <td data-label="Nombre" class="text-white td-user-nombre" th:text="${usuario.nombre}"></td>
+                            <td data-label="Roles" class="td-user-roles">
                                 <span th:each="rol : ${usuario.roles}" class="badge rounded-pill me-1"
                                       th:classappend="${rol.nombre == 'ROLE_ADMIN'} ? ' text-bg-primary' : ' text-bg-secondary'"
                                       th:text="${#strings.replace(rol.nombre, 'ROLE_', '')}"></span>
                             </td>
-                            <td class="text-end px-3 px-md-4 text-nowrap">
+                            <td class="text-end px-3 px-md-4 text-nowrap td-actions">
                                 <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}"
                                    class="btn btn-sm btn-outline-primary rounded-3" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
-                                    <span class="d-none d-md-inline">Editar</span>
+                                    <span class="d-inline d-md-inline">Editar</span>
                                 </a>
                                 <form th:unless="${usuario.id == usuarioActualId}" th:action="@{/usuarios/eliminar/{id}(id=${usuario.id})}"
                                       method="post" class="d-inline" data-confirm-delete
                                       data-confirm-message="¿Estás seguro de que deseas eliminar esta cuenta de usuario? Esta acción no se puede deshacer.">
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 ms-1" title="Eliminar">
                                         <i class="bi bi-trash"></i>
-                                        <span class="d-none d-md-inline">Eliminar</span>
+                                        <span class="d-inline d-md-inline">Eliminar</span>
                                     </button>
                                 </form>
                                 <span th:if="${usuario.id == usuarioActualId}" class="badge text-bg-light border ms-1"
@@ -78,7 +78,7 @@
                                 </span>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(usuarios)}">
+                        <tr th:if="${#lists.isEmpty(usuarios)}" class="table-empty-row">
                             <td colspan="5" class="text-center text-secondary py-5">
                                 No hay empleados registrados todavía.
                             </td>
